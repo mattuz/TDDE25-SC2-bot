@@ -21,4 +21,4 @@ navigate to the location you clone your fork of this repository.
 
 In order to run the code, right file name "main.py" in the project panel on the
 right and select "Debug main". This will run the code in "main.py" and start
-Starcraft II. You can now edit the code in "main.py" by double-clicking on it.
+Starcraft II. You can also edit the code in "main.py" by double-clicking on it.

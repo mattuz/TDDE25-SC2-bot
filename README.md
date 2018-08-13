@@ -15,3 +15,6 @@ the http link.
 Next, download the library binary from this page: (link)
 
 Put the library in the folder git repository you just downloaded.
+
+Now everything is ready for PyCharm, start PyCharm and select "Open" and
+navigate to the location you clone your fork of this repository.

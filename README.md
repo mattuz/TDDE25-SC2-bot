@@ -18,3 +18,7 @@ Put the library in the folder git repository you just downloaded.
 
 Now everything is ready for PyCharm, start PyCharm and select "Open" and
 navigate to the location you clone your fork of this repository.
+
+In order to run the code, right file name "main.py" in the project panel on the
+right and select "Debug main". This will run the code in "main.py" and start
+Starcraft II. You can now edit the code in "main.py" by double-clicking on it.

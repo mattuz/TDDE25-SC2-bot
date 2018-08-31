@@ -1,25 +1,16 @@
-# StarCraft II bot
+# StarCraft II Python Bot
+This repository contains a passive CommandCenterPy-based bot for StarCraft II. It is intended to be a reasonable starting-point for creating your own StarCraft II-playing system.
 
 ## Setup for creating your own bot
+1. Start by forking this repository. This will create your own copy of this repository, which can be done by pressing the fork button above. This will bring you to your own version of this page.
 
-Start of by forking this repository by pressing the fork button above, this
-will create your own copy of this repository.
+2. Now clone your new repository using the following command: `git clone <path>`, where `<path>` is the url to the right of the fork button you just pressed. If you have configured SSH-access, then use the SSH-link, otherwise use the HTTP link.
 
-This will bring you to your own version of this page.
+3. Next, setup the library in PyCharm. See [PyCommandCenter's page on PyCharm] for how to do that.
 
-Next you want to clone the new repository using the following command: `git
-clone <path>`, where `<path>` is the url to the right of the fork button you
-just pressed. If you have configured ssh-access use the ssh link, otherwise use
-the http link.
+4. Everything is now ready for PyCharm: Start PyCharm, and then select "Open" and navigate to the location you cloned your fork of this repository to.
 
-Next, you need to setup the library. See [PyCommandCenter's page on PyCharm]
-for how to do that.
+5. In order to run the code, right file name "main.py" in the project panel on the right and select "Debug main". This will run the code in "main.py" and start StarCraft II. You can also edit the code in "main.py" by double-clicking on it.
 
-Now everything is ready for PyCharm, start PyCharm and select "Open" and
-navigate to the location you clone your fork of this repository.
 
-In order to run the code, right file name "main.py" in the project panel on the
-right and select "Debug main". This will run the code in "main.py" and start
-StarCraft II. You can also edit the code in "main.py" by double-clicking on it.
-
-[PyCommandCenter's page on PyCharm]: https://gitlab.ida.liu.se/starcraft-api/pycommandcenter/blob/master/pycharm.md
+[PyCommandCenter's page on PyCharm]: https://gitlab.ida.liu.se/course-starcraft-ai/pycommandcenter/blob/master/pycharm.md

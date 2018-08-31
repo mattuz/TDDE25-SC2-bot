@@ -2,7 +2,6 @@ import os
 
 from library import *
 
-
 class MyAgent(IDABot):
     def __init__(self):
         IDABot.__init__(self)
@@ -12,7 +11,6 @@ class MyAgent(IDABot):
 
     def on_step(self):
         IDABot.on_step(self)
-
 
 def main():
     coordinator = Coordinator()
@@ -32,7 +30,6 @@ def main():
 
     while coordinator.update():
         pass
-
 
 if __name__ == "__main__":
     main()

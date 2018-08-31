@@ -10,7 +10,7 @@ This repository contains a passive CommandCenterPy-based bot for StarCraft II. I
 
 4. Everything is now ready for PyCharm: Start PyCharm, and then select "Open" and navigate to the location you cloned your fork of this repository to.
 
-5. In order to run the code, right file name "main.py" in the project panel on the right and select "Debug main". This will run the code in "main.py" and start StarCraft II. You can also edit the code in "main.py" by double-clicking on it.
+5. In order to run the code, right click the file named "main.py" in the project panel to the right, and select "Debug main". This will run the code in "main.py", and consequently start StarCraft II. You can also edit the code in "main.py" by double-clicking "main.py".
 
 
 [PyCommandCenter's page on PyCharm]: https://gitlab.ida.liu.se/course-starcraft-ai/pycommandcenter/blob/master/pycharm.md

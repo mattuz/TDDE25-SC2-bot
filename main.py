@@ -16,7 +16,8 @@ class MyAgent(IDABot):
 
 
 def main():
-    coordinator = Coordinator()
+    coordinator = Coordinator(r"D:\StarCraft II\Versions\Base69232\SC2_x64.exe")
+
     bot1 = MyAgent()
     # bot2 = MyAgent()
 

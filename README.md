@@ -2,9 +2,10 @@
 This repository contains a passive CommandCenterPy-based bot for StarCraft II. It is intended to be a reasonable starting-point for creating your own StarCraft II-playing system.
 
 ## Setup for creating your own bot
-1. Start by forking this repository. This will create your own copy of this repository, which can be done by pressing the fork button above. This will bring you to your own version of this page.
 
-2. Now clone your new repository using the following command: `git clone <path>`, where `<path>` is the url to the right of the fork button you just pressed. If you have configured SSH-access, then use the SSH link, otherwise use the HTTP link.
+1. Locate your fork of this repository. This will be automatically created for you when you register in webreg. The repository will be in the [TDDD92-2019 group](https://gitlab.liu.se/tddd92-2019).
+
+2. Now clone your new repository using the following command: `git clone <path>`, where `<path>` is shown when the blue button *Clone* in the top-right corner on your repository page. If you have configured SSH-access, then use the SSH link, otherwise use the HTTP link.
 
 3. Next, setup the library in PyCharm. See [PyCommandCenter's page on PyCharm] for how to do that.
 

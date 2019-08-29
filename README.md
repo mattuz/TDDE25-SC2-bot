@@ -1,5 +1,5 @@
 # StarCraft II Python Bot
-This repository contains a passive CommandCenterPy-based bot for StarCraft II. It is intended to be a reasonable starting-point for creating your own StarCraft II-playing system.
+This repository contains a passive PyCommandCenter-based bot for StarCraft II. It is intended to be a reasonable starting-point for creating your own StarCraft II-playing system.
 
 ## Setup for creating your own bot
 

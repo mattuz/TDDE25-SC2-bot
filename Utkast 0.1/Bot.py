@@ -1,6 +1,6 @@
 from main import *
 from library import *
-from gamevalues import *
+from gamestate import *
 import inspect
 
 

@@ -1,10 +1,14 @@
-import os
-
-from typing import Optional
+from Bot import *
 from library import *
+import time
+import os
 
 
 class MyAgent(IDABot):
+
+    global init_time
+    init_time = time.time()
+
     def __init__(self):
         IDABot.__init__(self)
 
@@ -12,14 +16,25 @@ class MyAgent(IDABot):
         IDABot.on_game_start(self)
 
     def on_step(self):
+        runtime = time.time() - init_time
+
         IDABot.on_step(self)
+
+        """MAIN"""
+        Bot.unit_debug(self)
+        Bot.neutral_debug(self)
+        Bot.distribute_workers(self)
+        Bot.make_workers(self)
+        #Bot.make_supply(self) # NOT FUNCTIONING AS INDENTED
+
+        Bot.session_info(self, runtime)
 
 
 def main():
-    coordinator = Coordinator(r"D:\StarCraft II\Versions\Base69232\SC2_x64.exe")
 
+    coordinator = Coordinator(r'D:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
-    # bot2 = MyAgent()
+    # bot2 =
 
     participant_1 = create_participants(Race.Terran, bot1)
     # participant_2 = create_participants(Race.Terran, bot2)

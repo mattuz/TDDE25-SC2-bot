@@ -25,7 +25,7 @@ class MyAgent(IDABot):
         Bot.neutral_debug(self)
         Bot.distribute_workers(self)
         Bot.make_workers(self)
-        #Bot.make_supply(self) # NOT FUNCTIONING AS INDENTED
+        Bot.build_order(self) # NOT FUNCTIONING AS INDENTED
 
         Bot.session_info(self, runtime)
 

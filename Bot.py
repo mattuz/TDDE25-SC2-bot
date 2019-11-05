@@ -1,14 +1,29 @@
 from main import *
 from library import *
 from gamestate import *
-import inspect
-
+import asyncio
 
 class Bot(MyAgent):
     """ Main method handler for bot features. Inherits MyAgent """
 
     def __init__(self):
         pass
+
+    def build_order(self):
+
+
+
+        self.make_supply(self, gamestate.wall_positions(self, 0))
+
+    def make_supply(self, pos):
+
+        TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
+
+        for SCV in gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
+            if SCV.is_alive and not SCV.unit_type.is_building:
+                builder = SCV
+
+        builder.build(TERRAN_SUPPLYDEPOT, pos)
 
     def unit_debug(self):
         """"Prints a debug message over agents units, also adds each unit to gamestate.AGENTUNITS dictionary"""
@@ -25,29 +40,42 @@ class Bot(MyAgent):
 
             pos = gamestate.AGENTUNITS[type].index(unit)
 
-            self.map_tools.draw_text(unit.position, (str(unit.unit_type) + " id: " + str(unit.id) + " i: " + str(pos)),
-                                     Color(255, 255, 255))
+            self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)
+                                                     + " POSITION:" + str(unit.position)), Color(255, 255, 255))
 
     def neutral_debug(self):
         """"Prints a debug message over neutral units, also adds each unit to gamestate.AGENTUNITS dictionary"""
 
-        for unit in self.base_location_manager.starting_base_locations[0].mineral_fields:
+        mineral_deposits = self.base_location_manager.get_player_starting_base_location(0).minerals
+        gas_deposits = self.base_location_manager.get_player_starting_base_location(0).geysers
 
-            #if unit in self.base_location_manager.starting_base_locations[0].mineral_fields or \
-             #            self.base_location_manager.starting_base_locations[0].geysers:
+        for unit in mineral_deposits:
 
             type = unit.unit_type.unit_typeid
 
-            if type not in gamestate.AGENTUNITS:
-                gamestate.AGENTUNITS.update({type: [unit]})
-                print("Added", type, 'To units dictionary')
-            elif unit not in gamestate.AGENTUNITS[type]:
-                gamestate.AGENTUNITS[type].append(unit)
+            if type not in gamestate.NEUTRALUNITS:
+                gamestate.NEUTRALUNITS.update({type: [unit]})
+                print("Added", type, 'To neutral dictionary')
+            elif unit not in gamestate.NEUTRALUNITS[type]:
+                gamestate.NEUTRALUNITS[type].append(unit)
 
-            pos = gamestate.AGENTUNITS[type].index(unit)
-
-            self.map_tools.draw_text(unit.position, (str(unit.unit_type) + " id: " + str(unit.id) + " i: " + str(pos)),
+            pos = gamestate.NEUTRALUNITS[type].index(unit)
+            self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
                                     Color(255, 255, 255))
+
+        for unit in gas_deposits:
+
+            type = unit.unit_type.unit_typeid
+
+            if type not in gamestate.NEUTRALUNITS:
+                gamestate.NEUTRALUNITS.update({type: [unit]})
+                print("Added", type, 'To neutral dictionary')
+            elif unit not in gamestate.NEUTRALUNITS[type]:
+                gamestate.NEUTRALUNITS[type].append(unit)
+
+            pos = gamestate.NEUTRALUNITS[type].index(unit)
+            self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
+                                     Color(255, 255, 255))
 
     def distribute_workers(self):
         """Distributes idle workers to nearby mineral nodes"""
@@ -83,19 +111,35 @@ class Bot(MyAgent):
                     and not base.is_training:
                 base.train(TERRAN_SCV)
 
-    def make_supply(self):  # NOT FUNCTIONING AS INTENDED
+    def make_wall(self, step):  # NOT FUNCTIONING AS INTENDED
         """Builds Supply Depots in case the supply dips below a threshold value"""
 
         TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
+        TERRAN_BARRACKS = UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)
 
-        supply_1 = (120, 75)
-        supply_2 = (124, 80)
+        if gamestate.start_base(self) == 'NE':
+            Wall_Supply_1 = (37.0, 122.0)
+            Wall_Supply_2 = (34.0, 125.0)
+            Wall_Barrack = (36.5, 124.5)
+        elif gamestate.start_base(self) == 'SE':
+            Wall_Supply_1 = (118.0, 43.0)
+            Wall_Supply_2 = (115.0, 46.0)
+            Wall_Barrack = (115.5, 43.5)
 
-        # if self.base_location_manager.get_player_starting_base_location(0).is_start_location:
+        for SCV in gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
+            if SCV.is_alive and not SCV.unit_type.is_building:
+                builder = SCV
 
-        if Bot.econ_check(self, TERRAN_SUPPLYDEPOT):
-            # BuildingPlacer.get_build_location_near(self, 120, 41, TERRAN_SUPPLYDEPOT, 2, 10)
-            Unit.build(TERRAN_SUPPLYDEPOT, supply_1)
+        if self.minerals >= 100:
+
+            builder.build(TERRAN_SUPPLYDEPOT, Point2DI(int(Wall_Supply_1[0]),int(Wall_Supply_1[1])))
+            await if not gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][0].unit_type.is_building:
+                builder.build(TERRAN_SUPPLYDEPOT, Point2DI(int(Wall_Supply_2[0]),int(Wall_Supply_2[1])))
+                time.sleep(3)
+                if not gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][1].unit_type.is_building:
+                    builder.build(TERRAN_BARRACKS, Point2DI(int(Wall_Barrack[0]), int(Wall_Barrack[1])))
+                    time.sleep(3)
+                    return True
 
     def session_info(self, runtime):
         """Draws info about current session on screen"""
@@ -103,6 +147,12 @@ class Bot(MyAgent):
         mapdraw = self.map_tools.draw_text_screen
 
         mapdraw(0.02, 0.20, "Workers:" + str(len(gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV])), Color(100, 200, 255))
+
+        mapdraw(0.02, 0.10, "Minerals Spent:" + str(gamestate.total_value(self)[0]), Color(100, 200, 255))
+        mapdraw(0.02, 0.115, "Gas Spent:" + str(gamestate.total_value(self)[1]), Color(100, 200, 255))
+        mapdraw(0.02, 0.13, "Minerals Lost:" + str(gamestate.total_lost(self)[0]), Color(100, 200, 255))
+        mapdraw(0.02, 0.145, "Gas Lost:" + str(gamestate.total_lost(self)[1]), Color(100, 200, 255))
+
         mapdraw(0.02, 0.60, "Minerals:" + str(self.minerals), Color(100, 200, 255))
         mapdraw(0.02, 0.615, "Gas:" + str(self.gas), Color(100, 200, 255))
         mapdraw(0.02, 0.63, "Unused Supply:" + str(self.max_supply - self.current_supply), Color(100, 200, 255))
@@ -120,3 +170,8 @@ class Bot(MyAgent):
                 producers.append(unit)
 
         return producers
+
+
+
+"""///////////////////////// TEST METHODS ////////////////////////"""
+

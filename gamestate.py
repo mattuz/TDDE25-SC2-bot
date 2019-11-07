@@ -5,12 +5,16 @@ class gamestate:
     """Data-class for MyAgent, more features to be added"""
 
     AGENTUNITS = {}
+    AGENTUPGRADES = {}
     NEUTRALUNITS = {}
 
     MINERAL_WORKER = []
     GAS_WORKER = []
+    BUILDER = []
+    ATTACKER = []
 
     BASE = []
+    WALLPOSITION = []
 
 
     def __init__(self):
@@ -60,11 +64,11 @@ class gamestate:
         start = gamestate.start_base(self)
 
         if start == 'NE':
-            WALLPOSITIONS = [(37.0, 122.0), (34.0, 125.0), (36.5, 124.5)]
+            WALLPOSITION = [(37.0, 122.0), (34.0, 125.0), (36.5, 124.5)]
         if start == 'SE':
-            WALLPOSITIONS = [(118.0, 43.0), (115.0, 46.0), (115.5, 43.5)]
+            WALLPOSITION = [(118.0, 43.0), (115.0, 46.0), (113.5, 43.5)]
 
-        return WALLPOSITIONS[step]
+        return WALLPOSITION[step][0], WALLPOSITION[step][1]
 
 
 

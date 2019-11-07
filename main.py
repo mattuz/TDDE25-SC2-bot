@@ -21,11 +21,24 @@ class MyAgent(IDABot):
         IDABot.on_step(self)
 
         """MAIN"""
+
         Bot.unit_debug(self)
         Bot.neutral_debug(self)
         Bot.distribute_workers(self)
+        if Bot.supply_check(self):
+            Bot.make_supply(self)
         Bot.make_workers(self)
-        Bot.build_order(self) # NOT FUNCTIONING AS INDENTED
+        Bot.make_refinery(self)
+        Bot.make_barracks(self)
+        if UNIT_TYPEID.TERRAN_BARRACKS in gamestate.AGENTUNITS:
+            Bot.barracks_upgrade(self)
+            Bot.make_marines(self)
+            if UNIT_TYPEID.TERRAN_MARINE in gamestate.AGENTUNITS:
+                Bot.marine_charge(self)
+
+
+
+        #Bot.build_order(self) # NOT FUNCTIONING AS INDENTED
 
         Bot.session_info(self, runtime)
 

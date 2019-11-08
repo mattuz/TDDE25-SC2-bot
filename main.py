@@ -25,16 +25,20 @@ class MyAgent(IDABot):
         Bot.unit_debug(self)
         Bot.neutral_debug(self)
         Bot.distribute_workers(self)
-        if Bot.supply_check(self):
-            Bot.make_supply(self)
+        Bot.make_supply(self)
         Bot.make_workers(self)
         Bot.make_refinery(self)
-        Bot.make_barracks(self)
-        if UNIT_TYPEID.TERRAN_BARRACKS in gamestate.AGENTUNITS:
-            Bot.barracks_upgrade(self)
-            Bot.make_marines(self)
-            if UNIT_TYPEID.TERRAN_MARINE in gamestate.AGENTUNITS:
-                Bot.marine_charge(self)
+
+
+        # if Bot.supply_check(self):
+        #    Bot.make_wall(self)
+        #Bot.make_barracks(self)
+        #if UNIT_TYPEID.TERRAN_BARRACKS in gamestate.AGENTUNITS:
+        #    Bot.barracks_upgrade(self)
+        #    Bot.make_marines(self)
+        #    if UNIT_TYPEID.TERRAN_MARINE in gamestate.AGENTUNITS:
+        #        Bot.marine_charge(self)
+
 
 
 
@@ -51,9 +55,9 @@ def main():
 
     participant_1 = create_participants(Race.Terran, bot1)
     # participant_2 = create_participants(Race.Terran, bot2)
-    participant_2 = create_computer(Race.Random, Difficulty.Easy)
+    participant_2 = create_computer(Race.Terran, Difficulty.Easy)
 
-    coordinator.set_real_time(True)
+    coordinator.set_real_time(False)
     coordinator.set_participants([participant_1, participant_2])
     coordinator.launch_starcraft()
 
@@ -66,3 +70,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

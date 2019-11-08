@@ -2,6 +2,7 @@ from main import *
 from library import *
 from gamestate import *
 import queue
+import random
 
 q = queue.Queue()
 
@@ -17,7 +18,7 @@ class Bot(MyAgent):
     def distribute_workers(self):
         """Distributes idle workers to nearby resource nodes"""
 
-        mineral_deposits = self.base_location_manager.get_player_starting_base_location(0).minerals
+        mineral_deposits = self.base_location_manager.get_player_starting_base_location(PLAYER_SELF).minerals
         base = gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]
 
         if UNIT_TYPEID.TERRAN_REFINERY in gamestate.AGENTUNITS:
@@ -33,10 +34,12 @@ class Bot(MyAgent):
                         (len(gamestate.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD]) * 2
                          + len(gamestate.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD750]) * 2):
                     for minerals in mineral_deposits:
+                        #minerals = random.choice(mineral_deposits)
                         worker.right_click(minerals)
+
                         if worker not in gamestate.MINERAL_WORKER:
-                            gamestate.MINERAL_WORKER.append(worker)
-                            print("Added", worker, "to mineral line")
+                                gamestate.MINERAL_WORKER.append(worker)
+                                print("Added", worker, "to mineral line")
 
                 elif UNIT_TYPEID.TERRAN_REFINERY in gamestate.AGENTUNITS and len(gamestate.MINERAL_WORKER) > 14:
                     for gas in refineries:
@@ -80,12 +83,12 @@ class Bot(MyAgent):
             if (len(gamestate.MINERAL_WORKER) < 16) \
                     and (Bot.econ_check(self, TERRAN_SCV) == True) and not base.is_training:
                 base.train(TERRAN_SCV)
-                time.sleep(0.2)
+                #time.sleep(0.2)
             elif UNIT_TYPEID.TERRAN_REFINERY in gamestate.AGENTUNITS:
                 if (len(gamestate.GAS_WORKER) < len(gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]) * 3) and \
                         Bot.econ_check(self, TERRAN_SCV) == True and not base.is_training:
                     base.train(TERRAN_SCV)
-                    time.sleep(0.2)
+                    #time.sleep(0.2)
 
     def make_refinery(self):
 
@@ -108,33 +111,33 @@ class Bot(MyAgent):
                 gamestate.BUILDER.append(builder)
                 gamestate.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].remove(GEYSER)
 
-    def make_supply(self):
-
-        TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
-        builder = Bot.get_worker()
-
-        if Bot.econ_check(self, TERRAN_SUPPLYDEPOT):
-            if self.max_supply < 23 and UNIT_TYPEID.TERRAN_SUPPLYDEPOT not in gamestate.AGENTUNITS:
-                x = int(gamestate.wall_positions(self, 0)[0])
-                y = int(gamestate.wall_positions(self, 0)[1])
-                if self.building_placer.can_build_here(x, y, TERRAN_SUPPLYDEPOT):
-                    builder.build(TERRAN_SUPPLYDEPOT, Point2DI(x, y))
-                    Bot.task_remover(builder)
-                    gamestate.BUILDER.append(builder)
-                    print('Added', builder, 'To BUILDER list')
-                    return
-
-            if 15 == self.max_supply and \
-                    gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][0].build_percentage > 0.6:
-                x = int(gamestate.wall_positions(self, 1)[0])
-                y = int(gamestate.wall_positions(self, 1)[1])
-                if self.building_placer.can_build_here(x, y, TERRAN_SUPPLYDEPOT):
-                    builder.build(TERRAN_SUPPLYDEPOT, Point2DI(x, y))
-                    Bot.task_remover(builder)
-                    gamestate.BUILDER.append(builder)
-                    print('Added', builder, 'To BUILDER list')
-                    return
-            # else:
+    # def make_wall(self):
+    #
+    #     TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
+    #     builder = Bot.get_worker()
+    #
+    #     if Bot.econ_check(self, TERRAN_SUPPLYDEPOT):
+    #         if self.max_supply < 23 and UNIT_TYPEID.TERRAN_SUPPLYDEPOT not in gamestate.AGENTUNITS:
+    #             x = int(gamestate.wall_positions(self, 0)[0])
+    #             y = int(gamestate.wall_positions(self, 0)[1])
+    #             if self.building_placer.can_build_here(x, y, TERRAN_SUPPLYDEPOT):
+    #                 builder.build(TERRAN_SUPPLYDEPOT, Point2DI(x, y))
+    #                 Bot.task_remover(builder)
+    #                 gamestate.BUILDER.append(builder)
+    #                 print('Added', builder, 'To BUILDER list')
+    #                 return
+    #
+    #         if 15 == self.max_supply and \
+    #                 gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][0].build_percentage > 0.6:
+    #             x = int(gamestate.wall_positions(self, 1)[0])
+    #             y = int(gamestate.wall_positions(self, 1)[1])
+    #             if self.building_placer.can_build_here(x, y, TERRAN_SUPPLYDEPOT):
+    #                 builder.build(TERRAN_SUPPLYDEPOT, Point2DI(x, y))
+    #                 Bot.task_remover(builder)
+    #                 gamestate.BUILDER.append(builder)
+    #                 print('Added', builder, 'To BUILDER list')
+    #                 return
+    #         # else:
 
     def make_barracks(self):
 
@@ -192,6 +195,24 @@ class Bot(MyAgent):
                 if attacker.is_idle:
                     attacker.attack_move(Point2D(opponent_base_x,opponent_base_y))
 
+    def make_supply(self):
+
+        if Bot.supply_check(self):
+            TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
+            if Bot.econ_check(self, TERRAN_SUPPLYDEPOT):
+                pos_x = int(gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.x)
+                pos_y = int(gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.y)
+                builder = Bot.get_worker()
+                print("MAKE_SUPPLY")
+                for i in range(10):
+                    build_pos = self.building_placer.get_build_location_near(Point2DI(pos_x, pos_y), TERRAN_SUPPLYDEPOT, 1, i*10)
+                    if self.building_placer.can_build_here(build_pos.x, build_pos.y, TERRAN_SUPPLYDEPOT):
+                        print("found", build_pos)
+                        builder.build(TERRAN_SUPPLYDEPOT, build_pos)
+                        break
+            else:
+                print("Make_supply failed")
+
     """////////////VALUE_RETURNS///////////"""
 
     def econ_check(self, unit_type: UnitType):
@@ -205,10 +226,13 @@ class Bot(MyAgent):
     def get_worker():
 
         for SCV in gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
-            if SCV.is_alive and SCV in gamestate.MINERAL_WORKER:
+            try:
+                is_building = SCV.is_constructing(gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][-1].unit_type)
+            except:
+                is_building = False
+            if SCV.is_alive and SCV in gamestate.MINERAL_WORKER and not is_building:
                 builder = SCV
-
-        return builder
+                return builder
 
     @staticmethod
     def get_available_neutral_unit(unit_type_id):
@@ -231,8 +255,11 @@ class Bot(MyAgent):
 
     def supply_check(self):
 
-        if self.current_supply - self.max_supply < 3:
+        if (self.max_supply - self.current_supply) < 3:
+            print('Avaliable supply is ', self.max_supply - self.current_supply)
             return True
+        else:
+            return False
 
     @staticmethod
     def task_remover(unit):
@@ -261,8 +288,8 @@ class Bot(MyAgent):
 
             pos = gamestate.AGENTUNITS[type].index(unit)
 
-            self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos))
-                                     , Color(255, 255, 255))
+            self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
+                                     Color(255, 255, 255))
 
     def neutral_debug(self):
         """"Prints a debug message over neutral units, also adds each unit to gamestate.AGENTUNITS dictionary"""
@@ -281,7 +308,7 @@ class Bot(MyAgent):
                 gamestate.NEUTRALUNITS[type].append(unit)
 
             pos = gamestate.NEUTRALUNITS[type].index(unit)
-            self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
+            self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " +str(unit.id) + " i: " + str(pos)),
                                      Color(255, 255, 255))
 
         for unit in gas_deposits:
@@ -302,7 +329,7 @@ class Bot(MyAgent):
                         unit = refinery
                         pos = gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY].index(refinery)
 
-            self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
+            self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
                                      Color(255, 255, 255))
 
     def session_info(self, runtime):
@@ -327,35 +354,61 @@ class Bot(MyAgent):
 
 """///////////////////////// TEST METHODS ////////////////////////"""
 
-# def make_wall(self, step):  # NOT FUNCTIONING AS INTENDED
-#     """Builds Supply Depots in case the supply dips below a threshold value"""
-#
-#     TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
-#     TERRAN_BARRACKS = UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)
-#
-#     if gamestate.start_base(self) == 'NE':
-#         Wall_Supply_1 = (37.0, 122.0)
-#         Wall_Supply_2 = (34.0, 125.0)
-#         Wall_Barrack = (36.5, 124.5)
-#     elif gamestate.start_base(self) == 'SE':
-#         Wall_Supply_1 = (118.0, 43.0)
-#         Wall_Supply_2 = (115.0, 46.0)
-#         Wall_Barrack = (115.5, 43.5)
-#
-#     for SCV in gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
-#         if SCV.is_alive and not SCV.unit_type.is_building:
-#             builder = SCV
-#
-#     if self.minerals >= 100:
-#
-#         builder.build(TERRAN_SUPPLYDEPOT, Point2DI(int(Wall_Supply_1[0]), int(Wall_Supply_1[1])))
-#         if not gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][0].unit_type.is_building:
-#             builder.build(TERRAN_SUPPLYDEPOT, Point2DI(int(Wall_Supply_2[0]), int(Wall_Supply_2[1])))
-#             time.sleep(3)
-#             if not gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT][1].unit_type.is_building:
-#                 builder.build(TERRAN_BARRACKS, Point2DI(int(Wall_Barrack[0]), int(Wall_Barrack[1])))
-#                 time.sleep(3)
-#                 return True
 
-# def build_order(self):
-#    self.make_supply(self, 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def neutral_debug(self):
+#     """"Prints a debug message over neutral units, also adds each unit to gamestate.AGENTUNITS dictionary"""
+#
+#     mineral_deposits = self.base_location_manager.get_player_starting_base_location(0).minerals
+#     gas_deposits = self.base_location_manager.get_player_starting_base_location(0).geysers
+#
+#     for unit in mineral_deposits:
+#
+#         type = unit.unit_type.unit_typeid
+#
+#         if type not in gamestate.NEUTRALUNITS:
+#             gamestate.NEUTRALUNITS.update({type: [unit]})
+#             print("Added", type, 'To neutral dictionary')
+#         elif unit not in gamestate.NEUTRALUNITS[type]:
+#             gamestate.NEUTRALUNITS[type].append(unit)
+#
+#         pos = gamestate.NEUTRALUNITS[type].index(unit)
+#         self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
+#                                  Color(255, 255, 255))
+#
+#     for unit in gas_deposits:
+#
+#         type = unit.unit_type.unit_typeid
+#
+#         if type not in gamestate.NEUTRALUNITS:
+#             gamestate.NEUTRALUNITS.update({type: [unit]})
+#             print("Added", type, 'To neutral dictionary')
+#         elif unit not in gamestate.NEUTRALUNITS[type]:
+#             gamestate.NEUTRALUNITS[type].append(unit)
+#
+#         pos = gamestate.NEUTRALUNITS[type].index(unit)
+#
+#         if UNIT_TYPEID.TERRAN_REFINERY in gamestate.AGENTUNITS:
+#             for refinery in gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
+#                 if refinery.position.x == unit.position.x:
+#                     unit = refinery
+#                     pos = gamestate.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY].index(refinery)
+#
+#         self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
+#                                  Color(255, 255, 255))

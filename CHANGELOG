@@ -1,0 +1,26 @@
+ÄNDRINGSLOG, start: 11/11-19
+-- Skriv gärna in ändringar som gjorts i koden här!
+-- markerea era inlägg med dagens datum och namn
+-- plus mindre förklaringar över vad som har ändrats
+--
+-- I fallet att nya metoder lags till så inkludera gärna en av följande taggar framför "metod", ex: Bot-Metod
+-- Bot-Metod: Metoder som hanterar spelet i sig, typ flytta på units eller något liknande
+-- Value-Metod: Metoder som returnerar något värde eller objekt, typ Bot.get_worker som returnerar en worker (objekt)
+-- Data-Metod: Metoder som hanterar data som används i övriga metoder, exempel listhantering eller logikhantering
+--
+-- Kommer ni på andra saker att lägga till så bara skriv ner det här! :)
+----------------------------------------------------------
+
+11/11, Grupp
+Ny Bot-metod: Bot.work_ref, ska hantera alla refineries och sköta worker-placeringar så att refineries inte tar emot fler
+än 3 workers. Använder dictionaryn Data.WORKER_REFINERIES för data-hantering
+
+Ny Value-metod: Bot.is_worker_collecting_gas, kontrollerar om en worker är inom 2^2 rutor från en refinery vilket implicerar
+att workern samlar gas.
+
+Många steg i Bot.worker_handler har hashats ut!
+
+------------------------------------------------------------
+
+datum/datum
+

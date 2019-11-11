@@ -1,9 +1,8 @@
 from library import *
-
 from data import *
 from extra import *
 from main import *
-from Simplified import *
+#from Simplified import *
 
 
 class Bot(MyAgent):
@@ -46,16 +45,25 @@ class Bot(MyAgent):
                             return
 
                 elif UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS and len(Data.MINERAL_WORKER) > 14:
-                    for gas in refineries:
-                        if len(Data.GAS_WORKER) < (len(refineries) * 3) and \
-                                Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY][-1].is_completed:
-                            worker.right_click(gas)
-                            if worker not in Data.GAS_WORKER:
-                                Data.GAS_WORKER.append(worker)
-                                if worker in Data.MINERAL_WORKER:
-                                    Data.MINERAL_WORKER.remove(worker)
-                                Bot.Debug_info[0] = "Added " + str(worker) + " go gas line"
-                                return
+                    Bot.work_ref(self)
+                #     for gas in refineries:
+                #         if gas not in Data.WORKERS_REFINERIES:
+                #             Data.WORKERS_REFINERIES.update({gas: []})
+                #         if len(Data.GAS_WORKER) < (len(refineries) * 3) and \
+                #                 Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY][-1].is_completed:
+                #             if not Bot.is_worker_collecting_gas(self, worker):
+                #                 for refineries in range(len(Data.WORKERS_REFINERIES)):
+                #                     if len(refineries) < 3:
+                #                         if worker not in Data.WORKERS_REFINERIES[gas]:
+                #                             Data.WORKERS_REFINERIES[gas].append(worker)
+                #                         worker.right_click(gas)
+                #
+                #         if worker not in Data.GAS_WORKER:
+                #             Data.GAS_WORKER.append(worker)
+                #             if worker in Data.MINERAL_WORKER:
+                #                 Data.MINERAL_WORKER.remove(worker)
+                #             Bot.Debug_info[0] = "Added " + str(worker) + " go gas line"
+                #             return
             else:
                 if worker.is_alive and worker.has_target and not worker.is_idle and not Bot.is_building(self, worker):
 
@@ -80,7 +88,9 @@ class Bot(MyAgent):
                     elif worker.target in mineral_deposits and len(Data.MINERAL_WORKER) > 16 \
                             and len(Data.GAS_WORKER) < (len(refineries) * 3):
                         for gas in refineries:
-                            worker.right_click(gas)
+                            if not Bot.is_worker_collecting_gas(self, worker):
+                                pass
+                                #worker.right_click(gas)
                             if worker in Data.MINERAL_WORKER:
                                 Data.MINERAL_WORKER.remove(worker)
                             Data.GAS_WORKER.append(worker)
@@ -101,6 +111,45 @@ class Bot(MyAgent):
                 if worker in Data.GAS_WORKER:
                     Data.GAS_WORKER.remove(worker)
                     return
+
+    def work_ref(self):
+        """ Puts workers in refineries"""
+        if not UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS:
+            return False
+
+        if UNIT_TYPEID.TERRAN_REFINERY in Data.WORKERS_REFINERIES:
+            for refinery in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
+                if refinery not in Data.WORKERS_REFINERIES:
+                    Data.WORKERS_REFINERIES.update({refinery: []})
+                else:
+                    if len(Data.WORKERS_REFINERIES[refinery]) < 3:
+                        for worker in Data.MINERAL_WORKER:
+                            if worker not in Data.WORKERS_REFINERIES[refinery]:
+                                Data.WORKERS_REFINERIES[refinery].append(worker)
+                                Data.MINERAL_WORKER.remove(worker)
+                                worker.right_click(refinery)
+
+
+            # for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
+            #     for refinery in Data.WORKERS_REFINERIES:
+            #         if worker in Data.WORKERS_REFINERIES[refinery]:
+            #             continue
+            #         else:
+            #             worker = worker
+            #             break
+            #
+            # for refinery in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
+            #         if refinery.is_completed and refinery not in Data.WORKERS_REFINERIES:
+            #             Data.WORKERS_REFINERIES.update({refinery.unit_type.unit_typeid: []})
+            #         if worker not in Data.WORKERS_REFINERIES[refinery]:
+            #             Data.WORKERS_REFINERIES.append(worker)
+            #         if len(Data.WORKERS_REFINERIES[refinery]) < 3:
+            #             worker.right_click(refinery)
+            #         else:
+            #             return
+
+
+
 
     def make_workers(self):
         """Creates workers"""
@@ -272,11 +321,16 @@ class Bot(MyAgent):
     def make_marines(self):
         """Makes Marines, Pewpew"""
 
+        if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) > 7:
+                return False
+
         if UNIT_TYPEID.TERRAN_BARRACKSREACTOR not in Data.AGENTUNITS:
             return False
 
         TERRAN_MARINE = UnitType(UNIT_TYPEID.TERRAN_MARINE, self)
         REACTOR = UnitType(UNIT_TYPEID.TERRAN_BARRACKSREACTOR, self)
+
 
         if Bot.econ_check(self, TERRAN_MARINE) and self.minerals > 200:
             for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
@@ -435,7 +489,6 @@ class Bot(MyAgent):
         for enemy in Data.enemies_in_base:
             if not enemy.is_alive:
                 Data.enemies_in_base.remove(enemy)
-                Data.enemies_in_base.remove(enemy)
             for i in range(2):
                 for type in Data.AGENT_COMBAT_UNITS:
                     for defender in Data.AGENT_COMBAT_UNITS[type]:
@@ -474,6 +527,17 @@ class Bot(MyAgent):
     #         # else:
 
     """////////////VALUE_RETURNS///////////"""
+
+    def is_worker_collecting_gas(self, worker):
+        """ Returns: True if a unit 'worker' is collecting gas, False otherwise """
+        def squared_distance(unit_1, unit_2):
+            p1 = unit_1.position
+            p2 = unit_2.position
+            return (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2
+
+        for refinery in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
+            if refinery.is_completed and squared_distance(worker, refinery) < 2 ** 2:
+                return True
 
     def has_addon(self, candidate: Unit, addon_type: UnitType):
         """
@@ -785,10 +849,10 @@ class Bot(MyAgent):
         mapdraw(0.02, 0.66, "Performance: " + str(int(performance)) + " Loops / Second", Color(100, 200, 255))
         
     def debug_info(self):
-
+        pass
         mapdraw = self.map_tools.draw_text_screen
 
-        mapdraw(0.2, 0.3, Bot.Debug_info, Color(100,200,255))
+        #mapdraw(0.2, 0.3, Bot.Debug_info, Color(100,200,255))
 
     """///////////STATE HANDLERS///////////"""
 

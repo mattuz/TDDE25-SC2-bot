@@ -1,7 +1,9 @@
-from Bot import *
-from library import *
-import time
 import os
+import time
+
+from library import *
+
+from Bot import *
 
 
 class MyAgent(IDABot):
@@ -27,10 +29,11 @@ class MyAgent(IDABot):
         Bot.unit_debug(self)  # DEBUG
         Bot.neutral_debug(self)  # DEBUG
         Bot.enemy_debug(self)  # DEBUG
+        Bot.debug_info(self)
 
         Bot.clear_build_list(self)  # DATA HANDLER
         Bot.build_queue()  # DATA HANDLER
-        Bot.unit_death_handler(self)  # DATA HANDLER
+        Bot.unit_death_handler()  # DATA HANDLER
 
         Bot.state_listener(self)  # STATE HANDLER
         Bot.base_listener(self)  # STATE HANDLER

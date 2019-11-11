@@ -1,13 +1,15 @@
-from main import *
 from library import *
+
 from data import *
 from extra import *
-import random
-
+from main import *
+from Simplified import *
 
 
 class Bot(MyAgent):
     """ Main method handler for bot features. Inherits MyAgent """
+    
+    Debug_info = [0]
 
     def __init__(self):
         pass
@@ -40,7 +42,7 @@ class Bot(MyAgent):
                             Data.MINERAL_WORKER.append(worker)
                             if worker in Data.GAS_WORKER:
                                 Data.GAS_WORKER.remove(worker)
-                            print("Added", worker, "to mineral line")
+                            Bot.Debug_info[0] = "Added " + str(worker) + " to mineral line"
                             return
 
                 elif UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS and len(Data.MINERAL_WORKER) > 14:
@@ -52,28 +54,28 @@ class Bot(MyAgent):
                                 Data.GAS_WORKER.append(worker)
                                 if worker in Data.MINERAL_WORKER:
                                     Data.MINERAL_WORKER.remove(worker)
-                                print("Added", worker, "to gas line")
+                                Bot.Debug_info[0] = "Added " + str(worker) + " go gas line"
                                 return
             else:
                 if worker.is_alive and worker.has_target and not worker.is_idle and not Bot.is_building(self, worker):
 
                     if worker.target in mineral_deposits and worker not in Data.MINERAL_WORKER:
                         Data.MINERAL_WORKER.append(worker)
-                        print("Added", worker, "to mineral line")
+                        Bot.Debug_info[0] = "Added " + str(worker) + " to mineral line"
                         return
                     elif worker.target in refineries and worker not in Data.GAS_WORKER:
                         Data.GAS_WORKER.append(worker)
-                        print("Added", worker, "to gas line")
+                        Bot.Debug_info[0] = "Added " + str(worker) + " go gas line"
                         return
                     elif worker.target not in mineral_deposits \
                             and worker.target not in base and worker in Data.MINERAL_WORKER:
                         Data.MINERAL_WORKER.remove(worker)
-                        print("Removed", worker, "from mineral line")
+                        Bot.Debug_info[0] = "Removed " + str(worker) + " from mineral line"
                         return
                     elif worker.target not in refineries \
                             and worker.target not in base and worker in Data.GAS_WORKER:
                         Data.GAS_WORKER.remove(worker)
-                        print("Removed", worker, "from gas line")
+                        Bot.Debug_info[0] = ["Removed" + str(worker) + "from gas line"]
                         return
                     elif worker.target in mineral_deposits and len(Data.MINERAL_WORKER) > 16 \
                             and len(Data.GAS_WORKER) < (len(refineries) * 3):
@@ -82,7 +84,7 @@ class Bot(MyAgent):
                             if worker in Data.MINERAL_WORKER:
                                 Data.MINERAL_WORKER.remove(worker)
                             Data.GAS_WORKER.append(worker)
-                            print("switched", worker, "to gas")
+                            Bot.Debug_info[0] = ["Switched" + str(worker) + "to gas"]
                             return
 
             if not Bot.is_building(self, worker):
@@ -198,6 +200,9 @@ class Bot(MyAgent):
                 and UNIT_TYPEID.TERRAN_ENGINEERINGBAY not in Data.AGENTUNITS:
 
             ENGINEERING_BAY = UnitType(UNIT_TYPEID.TERRAN_ENGINEERINGBAY, self)
+            COMMANDCENTER = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
+
+            #Ez.build(self, ENGINEERING_BAY, COMMANDCENTER)
 
             if Bot.econ_check(self, ENGINEERING_BAY) and Bot.build_queue_open() and \
                     len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) > 1:
@@ -387,7 +392,7 @@ class Bot(MyAgent):
         try:
             Data.MINERAL_WORKER.remove(scout)
             scout.move(Point2D(opponent_base_x, opponent_base_y))
-            print('sent scout')
+            Bot.Debug_info[0] = ['sent scout']
             for i in range(10):
                 pos_x = int(Data.ENEMYUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.x)
                 pos_y = int(Data.ENEMYUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.y)
@@ -430,7 +435,7 @@ class Bot(MyAgent):
         for enemy in Data.enemies_in_base:
             if not enemy.is_alive:
                 Data.enemies_in_base.remove(enemy)
-                Data.Data.enemies_in_base.remove(enemy)
+                Data.enemies_in_base.remove(enemy)
             for i in range(2):
                 for type in Data.AGENT_COMBAT_UNITS:
                     for defender in Data.AGENT_COMBAT_UNITS[type]:
@@ -453,7 +458,7 @@ class Bot(MyAgent):
     #                 builder.build(TERRAN_SUPPLYDEPOT, Point2DI(x, y))
     #                 Bot.task_remover(builder)
     #                 gamestate.BUILDER.append(builder)
-    #                 print('Added', builder, 'To BUILDER list')
+    #                 Bot.Debug_info[0] = [ 'Added', builder, 'To BUILDER list')
     #                 return
     #
     #         if 15 == self.max_supply and \
@@ -464,7 +469,7 @@ class Bot(MyAgent):
     #                 builder.build(TERRAN_SUPPLYDEPOT, Point2DI(x, y))
     #                 Bot.task_remover(builder)
     #                 gamestate.BUILDER.append(builder)
-    #                 print('Added', builder, 'To BUILDER list')
+    #                 Bot.Debug_info[0] = [ 'Added', builder, 'To BUILDER list')
     #                 return
     #         # else:
 
@@ -568,10 +573,16 @@ class Bot(MyAgent):
     def supply_check(self):
         """Checks to see if supply is running low"""
 
-        if (self.max_supply - self.current_supply) < 4:
-            return True
+        if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS:
+            if (self.max_supply - self.current_supply) < 2*len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]):
+                return True
+            else:
+                return False
         else:
-            return False
+            if (self.max_supply - self.current_supply) < 2:
+                return True
+            else:
+                return False
 
     @staticmethod
     def unit_death_handler():
@@ -580,7 +591,26 @@ class Bot(MyAgent):
         for types in Data.AGENTUNITS:
             for unit in Data.AGENTUNITS[types]:
                 if not unit.is_alive:
+                    Data.AGENT_LOST[0] += unit.unit_type.mineral_price
+                    Data.AGENT_LOST[1] += unit.unit_type.gas_price
                     Data.AGENTUNITS[types].remove(unit)
+
+        for types in Data.ENEMYUNITS:
+            for unit in Data.ENEMYUNITS[types]:
+                if not unit.is_alive:
+                    Data.ENEMY_LOST[0] += unit.unit_type.mineral_price
+                    Data.ENEMY_LOST[1] += unit.unit_type.gas_price
+                    Data.ENEMYUNITS[types].remove(unit)
+
+        for types in Data.NEUTRALUNITS:
+            for unit in Data.NEUTRALUNITS[types]:
+                if not unit.is_alive:
+                    Data.NEUTRALUNITS[types].remove(unit)
+
+        for types in Data.AGENT_COMBAT_UNITS:
+            for unit in Data.AGENT_COMBAT_UNITS[types]:
+                if not unit.is_alive:
+                    Data.AGENT_COMBAT_UNITS[types].remove(unit)
 
     @staticmethod
     def build_queue_open():
@@ -607,23 +637,24 @@ class Bot(MyAgent):
         for units in range(types):
             current = list(Data.AGENTUNITS)[units]
 
-            if not Data.AGENTUNITS[current][0] in Data.AGENTUNITS[current]:
-                continue
-            if Data.AGENTUNITS[current][0].unit_type.is_building:
-                for building in Data.AGENTUNITS[current]:
-                    if not building.is_completed and building not in Data.BUILDQ \
-                            and building.player == PLAYER_SELF:
-                        Data.BUILDQ.append(building)
-                    elif building.is_completed and building in Data.BUILDQ \
-                            and building.player == PLAYER_SELF:
-                        Data.BUILDQ.remove(building)
-
-        for UnitCheck in Data.BUILDQ:
             try:
-                if UnitCheck.player != PLAYER_SELF:
-                    Data.BUILDQ.remove(UnitCheck)
-            except:
-                Data.BUILDQ.remove(UnitCheck)
+                if Data.AGENTUNITS[current][0].unit_type.is_building:
+                    for building in Data.AGENTUNITS[current]:
+                        if not building.is_completed and building not in Data.BUILDQ \
+                                and building.player == PLAYER_SELF:
+                            Data.BUILDQ.append(building)
+                        elif building.is_completed and building in Data.BUILDQ \
+                                and building.player == PLAYER_SELF:
+                            Data.BUILDQ.remove(building)
+
+                for UnitCheck in Data.BUILDQ:
+                    try:
+                        if UnitCheck.player != PLAYER_SELF:
+                            Data.BUILDQ.remove(UnitCheck)
+                    except Exception as e:
+                        Data.BUILDQ.remove(UnitCheck)
+            except IndexError:
+                del Data.AGENTUNITS[current]
 
     """///////////GRAPHICS//////////////////"""
 
@@ -639,13 +670,13 @@ class Bot(MyAgent):
                 if unit.unit_type.is_combat_unit:
                     if type not in Data.AGENT_COMBAT_UNITS:
                         Data.AGENT_COMBAT_UNITS.update({type: [unit]})
-                        print("Added", type, 'To Combat dictionary')
+                        Bot.Debug_info[0] = [ "Added" + str(type) + 'To Combat dictionary']
                     elif unit not in Data.AGENT_COMBAT_UNITS[type]:
                         Data.AGENT_COMBAT_UNITS[type].append(unit)
 
                 if type not in Data.AGENTUNITS:
                     Data.AGENTUNITS.update({type: [unit]})
-                    print("Added", type, 'To Units dictionary')
+                    Bot.Debug_info[0] = ["Added" + str(type) + 'To Units dictionary']
                 elif unit not in Data.AGENTUNITS[type]:
                     Data.AGENTUNITS[type].append(unit)
 
@@ -669,7 +700,7 @@ class Bot(MyAgent):
 
             if type not in Data.NEUTRALUNITS:
                 Data.NEUTRALUNITS.update({type: [unit]})
-                print("Added", type, 'To Neutral dictionary')
+                Bot.Debug_info[0] = [ "Added" + str(type) + 'To Neutral dictionary']
             elif unit not in Data.NEUTRALUNITS[type]:
                 Data.NEUTRALUNITS[type].append(unit)
 
@@ -687,7 +718,7 @@ class Bot(MyAgent):
 
             if type not in Data.NEUTRALUNITS:
                 Data.NEUTRALUNITS.update({type: [unit]})
-                print("Added", type, 'To neutral dictionary')
+                Bot.Debug_info[0] = [ "Added" + str(type) + 'To neutral dictionary']
             elif unit not in Data.NEUTRALUNITS[type]:
                 Data.NEUTRALUNITS[type].append(unit)
 
@@ -716,7 +747,7 @@ class Bot(MyAgent):
 
                 if type not in Data.ENEMYUNITS:
                     Data.ENEMYUNITS.update({type: [unit]})
-                    print("Added", type, 'To Enemy dictionary')
+                    Bot.Debug_info[0] = [ "Added" + str(type) + 'To Enemy dictionary']
                 elif unit not in Data.ENEMYUNITS[type]:
                     Data.ENEMYUNITS[type].append(unit)
 
@@ -733,13 +764,13 @@ class Bot(MyAgent):
 
         mapdraw(0.02, 0.05, "Minerals Spent:" + str(Data.total_value(self)[0]), Color(100, 200, 255))
         mapdraw(0.02, 0.075, "Gas Spent:" + str(Data.total_value(self)[1]), Color(100, 200, 255))
-        mapdraw(0.02, 0.1, "Minerals Lost:" + str(Data.total_lost(self)[0]), Color(100, 200, 255))
-        mapdraw(0.02, 0.115, "Gas Lost:" + str(Data.total_lost(self)[1]), Color(100, 200, 255))
+        mapdraw(0.02, 0.1, "Minerals Lost:" + str(Data.AGENT_LOST[0]), Color(100, 200, 255))
+        mapdraw(0.02, 0.115, "Gas Lost:" + str(Data.AGENT_LOST[1]), Color(100, 200, 255))
 
         mapdraw(0.8, 0.05, "Enemy Minerals Spent:" + str(Data.enemy_total_value(self)[0]), Color(255, 100, 0))
         mapdraw(0.8, 0.075, "Enemy Gas Spent:" + str(Data.enemy_total_value(self)[1]), Color(255, 100, 0))
-        mapdraw(0.8, 0.1, "Enemy Minerals Lost:" + str(Data.enemy_total_lost(self)[0]), Color(255, 100, 0))
-        mapdraw(0.8, 0.115, "Enemy Gas Lost:" + str(Data.enemy_total_lost(self)[1]), Color(255, 100, 0))
+        mapdraw(0.8, 0.1, "Enemy Minerals Lost:" + str(Data.ENEMY_LOST[0]), Color(255, 100, 0))
+        mapdraw(0.8, 0.115, "Enemy Gas Lost:" + str(Data.ENEMY_LOST[1]), Color(255, 100, 0))
 
         mapdraw(0.02, 0.20, "Workers:" + str(len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV])), Color(100, 200, 255))
         mapdraw(0.02, 0.215, "On Minerals:" + str(len(Data.MINERAL_WORKER)), Color(100, 200, 255))
@@ -752,6 +783,12 @@ class Bot(MyAgent):
         mapdraw(0.02, 0.63, "Unused Supply:" + str(self.max_supply - self.current_supply), Color(100, 200, 255))
         mapdraw(0.02, 0.645, "Runtime " + str(round(runtime, 0)), Color(100, 200, 255))
         mapdraw(0.02, 0.66, "Performance: " + str(int(performance)) + " Loops / Second", Color(100, 200, 255))
+        
+    def debug_info(self):
+
+        mapdraw = self.map_tools.draw_text_screen
+
+        mapdraw(0.2, 0.3, Bot.Debug_info, Color(100,200,255))
 
     """///////////STATE HANDLERS///////////"""
 
@@ -764,7 +801,7 @@ class Bot(MyAgent):
                 and Data.AGENTSTATE['STATE'] == 0:
             if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) > 2:
                 Bot.state_setter('STATE', 1)
-                print('SET STATE TO 1 - GENERAL GAMEPLAY')
+                Bot.Debug_info[0] = [ 'SET STATE TO 1 - GENERAL GAMEPLAY']
 
     @staticmethod
     def state_setter(state, routine):
@@ -796,9 +833,6 @@ class Bot(MyAgent):
                     else:
                         if enemy in Data.enemies_in_base:
                             Data.enemies_in_base.remove(enemy)
-        
-
-
 
 
 """///////////////////////// TEST METHODS ////////////////////////"""
@@ -815,7 +849,7 @@ class Bot(MyAgent):
 #
 #         if type not in gamestate.NEUTRALUNITS:
 #             gamestate.NEUTRALUNITS.update({type: [unit]})
-#             print("Added", type, 'To neutral dictionary')
+#             Bot.Debug_info[0] = [ "Added", type, 'To neutral dictionary')
 #         elif unit not in gamestate.NEUTRALUNITS[type]:
 #             gamestate.NEUTRALUNITS[type].append(unit)
 #
@@ -829,7 +863,7 @@ class Bot(MyAgent):
 #
 #         if type not in gamestate.NEUTRALUNITS:
 #             gamestate.NEUTRALUNITS.update({type: [unit]})
-#             print("Added", type, 'To neutral dictionary')
+#             Bot.Debug_info[0] = [ "Added", type, 'To neutral dictionary')
 #         elif unit not in gamestate.NEUTRALUNITS[type]:
 #             gamestate.NEUTRALUNITS[type].append(unit)
 #

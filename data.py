@@ -5,9 +5,6 @@ from library import *
 class Data():
     """Data-class for MyAgent, more features to be added"""
 
-    def __init__(self):
-        super(Data, self).__init__()
-
 
     AGENTSTATE = {'STATE': 0, 'PURPOSE': 'OFFENCE', 'ROUTINE': 'UPKEEP', 'STRATEGY': 'BIOPRESSURE'}
     AGENTUNITS = {}
@@ -23,6 +20,7 @@ class Data():
 
     MINERAL_WORKER = []
     GAS_WORKER = []
+    WORKERS_REFINERIES = {}
     BUILDER = []
     BUILDQ = []
     ATTACKER = []
@@ -35,6 +33,8 @@ class Data():
     NE_BASE = (26.5, 137.5)
     SE_BASE = (125.5, 30.5)
 
+    def __init__(self):
+        pass
 
     def start_base(self):
         """Determines PLAYER_SELF starting base"""

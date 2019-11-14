@@ -7,6 +7,7 @@ class Data():
 
 
     AGENTSTATE = {'STATE': 0, 'PURPOSE': 'OFFENCE', 'ROUTINE': 'UPKEEP', 'STRATEGY': 'BIOPRESSURE'}
+    MY_UNITS = {}
     AGENTUNITS = {}
     AGENT_COMBAT_UNITS = {}
     AGENT_ECONOMY = [0, 0]
@@ -20,6 +21,7 @@ class Data():
 
     MINERAL_WORKER = []
     GAS_WORKER = []
+    REFINERIES = []
     WORKERS_REFINERIES = {}
     BUILDER = []
     BUILDQ = []
@@ -86,9 +88,9 @@ class Data():
         start = Data.start_base(self)
 
         if start == 'NE':
-            WALLPOSITION = [(37.0, 122.0), (34.0, 125.0), (36.5, 124.5)]
+            WALLPOSITION = [(37.0, 122.0), (34.0, 125.0), (32.5, 120.5)]
         if start == 'SE':
-            WALLPOSITION = [(118.0, 43.0), (115.0, 46.0), (113.5, 43.5)]
+            WALLPOSITION = [(118.0, 43.0), (115.0, 46.0), (117.5, 46.5)]
 
         return WALLPOSITION[step][0], WALLPOSITION[step][1]
 

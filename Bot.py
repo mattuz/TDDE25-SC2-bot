@@ -2,6 +2,7 @@ from library import *
 from data import *
 from extra import *
 from main import *
+from Simplified import *
 
 
 # from Simplified import *
@@ -165,26 +166,29 @@ class Bot(MyAgent):
 
             for refinery in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
                 if refinery.id not in Data.WORKERS_REFINERIES and refinery.is_completed:
-                    Data.WORKERS_REFINERIES.update({refinery.id: []})
+                    Data.WORKERS_REFINERIES.update({refinery.id : []})
                     return
                 elif refinery.id in Data.WORKERS_REFINERIES:
                     try:
                         if len(Data.WORKERS_REFINERIES[refinery.id]) < 3 and len(Data.MINERAL_WORKER) > 14 and \
-                                len(Data.GAS_WORKER) < len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) * 3:
+                                len(Data.GAS_WORKER) < len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) * 6:
 
                             for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
+                                if Bot.is_building(self, worker):
+                                    continue
                                 for i in Data.WORKERS_REFINERIES:
                                     workers.extend(Data.WORKERS_REFINERIES[i])
-                                if worker.id not in workers:
-                                    print(workers, 'WORKER:', worker.id)
-                                    Data.WORKERS_REFINERIES[refinery.id].append(worker.id)
-                                    worker.right_click(refinery)
-                                    return
-                                if worker.is_idle and worker.id in workers:
+                                if worker not in workers:
+                                    print(workers, 'WORKER:', worker)
+                                    Data.WORKERS_REFINERIES[refinery.id].append(worker)
                                     worker.right_click(refinery)
                                     return
 
-                        elif len(Data.GAS_WORKER) > len(Data.WORKERS_REFINERIES) * 3:
+                        for worker in Data.WORKERS_REFINERIES[refinery.id]:
+                            if worker.is_idle:
+                                worker.right_click(refinery)
+                                return
+                        if len(Data.GAS_WORKER) > len(Data.WORKERS_REFINERIES) * 3:
                             for i in Data.WORKERS_REFINERIES:
                                 workers.append(Data.WORKERS_REFINERIES[i])
                             for rogue in Data.GAS_WORKER:
@@ -301,6 +305,15 @@ class Bot(MyAgent):
                     else:
                         builder.build(TERRAN_BARRACKS, build_pos)
                         Data.BUILDER.append(builder)
+
+    def test_build(self):
+
+        if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_BARRACKS not in Data.AGENTUNITS:
+
+            TERRAN_BARRACKS = UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)
+            base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
+
+            Bot.build(self, TERRAN_BARRACKS, base, 2)
 
     def make_engineering_bay(self):
         """makes engineering bay"""
@@ -560,6 +573,16 @@ class Bot(MyAgent):
         if len(Data.enemies_in_base) < 2 and Data.AGENTSTATE['PURPOSE'] != 'OFFENCE':
             Bot.state_setter('PURPOSE', 'OFFENCE')
 
+    def move_marines_to_ramp(self):
+
+        if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
+
+            ramp = Data.wall_positions(self, 2)
+
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) >= 8:
+                for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]:
+                        marine.move(Point2D(ramp[0], ramp[1]))
+
     # def make_wall(self):
     #
     #     TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
@@ -617,11 +640,11 @@ class Bot(MyAgent):
 
         return False
 
-    def find_build_target(self, pos_x, pos_y, unit_to_build, space, int):
+    def find_build_target(self, pos_x, pos_y, unit_to_build, space, hej):
         """Finds nearest buildable tile to a building"""
 
-        for i in range(int):
-            build_pos = self.building_placer.get_build_location_near(Point2DI(pos_x, pos_y), unit_to_build, space,
+        for i in range(hej):
+            build_pos = self.building_placer.get_build_location_near(Point2DI(int(pos_x), int(pos_y)), unit_to_build, space,
                                                                      i * 10)
             if self.building_placer.can_build_here(build_pos.x, build_pos.y, unit_to_build):
                 return build_pos
@@ -668,6 +691,37 @@ class Bot(MyAgent):
             return True
         else:
             return False
+
+    def is_building_name(self, unit):
+
+        if unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)):
+            return 'barracks'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)):
+            return 'supply depot'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_REFINERY, self)):
+            return 'refinery'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_COMMANDCENTER, self)):
+            return 'command center'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_ARMORY, self)):
+            return 'armory'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_BUNKER, self)):
+            return 'bunker'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_ENGINEERINGBAY, self)):
+            return 'engineering bay'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_FACTORY, self)):
+            return 'factory'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_GHOSTACADEMY, self)):
+            return 'ghost academy'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_SENSORTOWER, self)):
+            return 'sensor tower'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_STARPORT, self)):
+            return 'starport'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_MISSILETURRET, self)):
+            return 'missile turret'
+        elif unit.is_constructing(UnitType(UNIT_TYPEID.TERRAN_FUSIONCORE, self)):
+            return 'fusion core'
+        else:
+            return 'None'
 
     def econ_check(self, unit_type: UnitType):
         """Asserts that agents economy allows the requested build/train command"""
@@ -783,6 +837,18 @@ class Bot(MyAgent):
             except IndexError:
                 del Data.AGENTUNITS[current]
 
+    def build(self, building: UnitType, near: Unit, range):
+        """build(self: Bot, building: library.UnityType, near: library.Unit) -> None"""
+
+        if Bot.build_queue_open() and Bot.econ_check(self, building):
+            x = near.position.x
+            y = near.position.y
+            pos = Bot.find_build_target(self, x, y, building, range, 10)
+            if self.building_placer.can_build_here(pos.x, pos.y, building):
+                builder = Bot.get_worker(self)
+                builder.build(building, pos)
+
+
     """///////////GRAPHICS//////////////////"""
 
     def unit_debug(self):
@@ -812,8 +878,28 @@ class Bot(MyAgent):
                 # self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
                 #                         Color(255, 255, 255))
 
-                self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
-                                         Color(255, 255, 255))
+
+    def unit_task(self):
+
+        for unit in self.get_my_units():
+            if unit.unit_type.is_building:
+                continue
+            elif unit.unit_type.is_worker:
+                if unit in Data.MINERAL_WORKER:
+                    task = "minerals"
+                elif unit in Data.GAS_WORKER:
+                    task = "gas"
+                elif Bot.is_building(self, unit):
+                    task = Bot.is_building_name(self, unit)
+                else:
+                    task = "Bruh"
+            else:
+                task = ''
+
+            type = unit.unit_type.unit_typeid
+            pos = Data.AGENTUNITS[type].index(unit)
+
+            self.map_tools.draw_text(unit.position, str(task) + " i: " + str(pos) , Color(255, 255, 255))
 
     def neutral_debug(self):
         """"Prints a debug message over neutral units, also adds each unit to gamestate.AGENTUNITS dictionary"""

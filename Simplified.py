@@ -7,15 +7,15 @@ class Ez():
     """Simplified methods from Bot"""
 
     def __init__(self, *args, **kwargs):
-        self.args = args
+        pass
 
-    def build(self, building: UnitType, near: Unit):
+    def build(self, building: UnitType, near: Unit, range):
         """build(self: Bot, building: library.UnityType, near: library.Unit) -> None"""
 
-        if self.build_queue_open() and self.econ_check(self, building):
+        if Bot.build_queue_open() and Bot.econ_check(self, building):
             x = near.position.x,
             y = near.position.y
-            pos = self.find_build_target(Point2D(x, y), building, 2, 10)
+            pos = self.find_build_target(x, y, building, range, 10)
             if library.building_placer.can_build_here(pos.x, pos.y, building):
                 builder = Bot.get_worker(self)
                 builder.build(building, pos)

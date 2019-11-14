@@ -22,5 +22,9 @@ Många steg i Bot.worker_handler har hashats ut!
 
 ------------------------------------------------------------
 
-datum/datum
+14/11, Grupp
+Fixade 'typ' refinery hanteringen
+Fick marines att springa till choke
+Nya prints baserat på tasks
 
+Ny metod: Build. Enklare hantering av bygg-prylar etc etc

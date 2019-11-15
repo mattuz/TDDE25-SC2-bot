@@ -19,3 +19,11 @@ class Ez():
             if library.building_placer.can_build_here(pos.x, pos.y, building):
                 builder = Bot.get_worker(self)
                 builder.build(building, pos)
+
+    def near(self, pos, unit_pos, *radius):
+
+        distance = self.map_tools.get_ground_distance(unit_pos, pos)
+        if distance <= radius:
+            return True
+        else:
+            return False

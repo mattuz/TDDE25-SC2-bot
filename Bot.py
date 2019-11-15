@@ -21,7 +21,12 @@ class Bot(MyAgent):
     def mineral_worker_handler(self):
         """Handles Worker-states"""
 
-        mineral_deposits = self.base_location_manager.get_player_starting_base_location(PLAYER_SELF).minerals
+        """FIXA SÅ SKITEN KLICKAR LOL"""
+
+        if UNIT_TYPEID.NEUTRAL_MINERALFIELD not in Data.AGENTUNITS:
+            return
+
+        mineral_deposits = Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD] + Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD750]
         base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]
 
         for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
@@ -253,12 +258,13 @@ class Bot(MyAgent):
                 Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].remove(GEYSER)
                 Data.BUILDER.append(builder)
                 return
-
-            if Bot.econ_check(self, TERRAN_REFINERY) and len(Data.GAS_WORKER) == 3:
-                builder.build_target(TERRAN_REFINERY, GEYSER)
-                Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].remove(GEYSER)
-                Data.BUILDER.append(builder)
+            else:
                 return
+                if Bot.econ_check(self, TERRAN_REFINERY) and len(Data.GAS_WORKER) == 3:
+                    builder.build_target(TERRAN_REFINERY, GEYSER)
+                    Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].remove(GEYSER)
+                    Data.BUILDER.append(builder)
+                    return
 
     def make_barracks(self):
         """makes barracks"""
@@ -578,11 +584,20 @@ class Bot(MyAgent):
         if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
 
             ramp = Data.wall_positions(self, 2)
-
             if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) >= 8:
-                for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]:
+                for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE][0:8]:
+                    if not Bot.near(self, marine.position, Point2D(ramp[0], ramp[1]), 5):
                         marine.move(Point2D(ramp[0], ramp[1]))
+                    else:
+                        continue
 
+    def near(self, pos: Point2D, unit_pos: Point2D, radius: int):
+
+        distance = self.map_tools.get_ground_distance(unit_pos, pos)
+        if distance <= radius:
+            return True
+        else:
+            return False
     # def make_wall(self):
     #
     #     TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
@@ -878,7 +893,6 @@ class Bot(MyAgent):
                 # self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
                 #                         Color(255, 255, 255))
 
-
     def unit_task(self):
 
         for unit in self.get_my_units():
@@ -905,19 +919,38 @@ class Bot(MyAgent):
         """"Prints a debug message over neutral units, also adds each unit to gamestate.AGENTUNITS dictionary"""
 
         mineral_deposits = self.base_location_manager.get_player_starting_base_location(0).minerals
+
+
+        try:
+            if len(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD]) < 4 * len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) and \
+                len(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD750]) < 4 * len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) and \
+                len(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER]) < 2 * len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]):
+
+                for commandcenter in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]:
+                    for mineral in self.get_all_units():
+                        if mineral.unit_type.is_mineral and Bot.near(self, mineral.position, commandcenter.position, 10):
+                            type = mineral.unit_type.unit_typeid
+                            if type not in Data.NEUTRALUNITS:
+                                Data.NEUTRALUNITS.update({type: [mineral]})
+                                Bot.Debug_info[0] = ["Added" + str(type) + 'To Neutral dictionary']
+                            elif mineral not in Data.NEUTRALUNITS[type]:
+                                Data.NEUTRALUNITS[type].append(mineral)
+            else:
+                return True
+        except Exception as e:
+            print(e)
+            mineral_deposits = self.base_location_manager.get_player_starting_base_location(0).minerals
+            for unit in mineral_deposits:
+                type = unit.unit_type.unit_typeid
+                if type not in Data.NEUTRALUNITS:
+                    Data.NEUTRALUNITS.update({type: [unit]})
+                    Bot.Debug_info[0] = ["Added" + str(type) + 'To Neutral dictionary']
+                elif unit not in Data.NEUTRALUNITS[type]:
+                    Data.NEUTRALUNITS[type].append(unit)
+        pos = Data.NEUTRALUNITS[type].index(unit)
         gas_deposits = self.base_location_manager.get_player_starting_base_location(0).geysers
 
-        for unit in mineral_deposits:
 
-            type = unit.unit_type.unit_typeid
-
-            if type not in Data.NEUTRALUNITS:
-                Data.NEUTRALUNITS.update({type: [unit]})
-                Bot.Debug_info[0] = ["Added" + str(type) + 'To Neutral dictionary']
-            elif unit not in Data.NEUTRALUNITS[type]:
-                Data.NEUTRALUNITS[type].append(unit)
-
-            pos = Data.NEUTRALUNITS[type].index(unit)
 
             # self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
             #                         Color(255, 255, 255))

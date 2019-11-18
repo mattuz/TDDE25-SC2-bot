@@ -23,10 +23,10 @@ class Bot(MyAgent):
 
         """FIXA SÅ SKITEN KLICKAR LOL"""
 
-        if UNIT_TYPEID.NEUTRAL_MINERALFIELD not in Data.AGENTUNITS:
+        if UNIT_TYPEID.NEUTRAL_MINERALFIELD not in Data.NEUTRALUNITS:
             return
 
-        mineral_deposits = Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD] + Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD750]
+        mineral_deposits = Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD] #+ Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD750]
         base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]
 
         for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
@@ -169,14 +169,23 @@ class Bot(MyAgent):
             if len(Data.GAS_WORKER) == 3 * len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]):
                 return True
 
+            if len(Data.GAS_WORKER) > 3 * len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]):
+                all_in_refinery = []
+                for i in Data.WORKERS_REFINERIES:
+                    for worker in Data.WORKERS_REFINERIES[i]:
+                        all_in_refinery.append(worker)
+                for worker in Data.GAS_WORKER:
+                    if worker in Data.GAS_WORKER and worker not in all_in_refinery:
+                        worker.right_click(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD][0])
+
             for refinery in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
                 if refinery.id not in Data.WORKERS_REFINERIES and refinery.is_completed:
-                    Data.WORKERS_REFINERIES.update({refinery.id : []})
+                    Data.WORKERS_REFINERIES.update({refinery.id: []})
                     return
                 elif refinery.id in Data.WORKERS_REFINERIES:
                     try:
-                        if len(Data.WORKERS_REFINERIES[refinery.id]) < 3 and len(Data.MINERAL_WORKER) > 14 and \
-                                len(Data.GAS_WORKER) < len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) * 6:
+                        if len(Data.WORKERS_REFINERIES[refinery.id]) <= 2 and len(Data.MINERAL_WORKER) > 0: #and \
+                                #len(Data.GAS_WORKER) < len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]) * 3:
 
                             for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
                                 if Bot.is_building(self, worker):
@@ -188,18 +197,13 @@ class Bot(MyAgent):
                                     Data.WORKERS_REFINERIES[refinery.id].append(worker)
                                     worker.right_click(refinery)
                                     return
-
                         for worker in Data.WORKERS_REFINERIES[refinery.id]:
                             if worker.is_idle:
                                 worker.right_click(refinery)
                                 return
-                        if len(Data.GAS_WORKER) > len(Data.WORKERS_REFINERIES) * 3:
+                        if len(Data.GAS_WORKER) >= len(Data.WORKERS_REFINERIES) * 3:
                             for i in Data.WORKERS_REFINERIES:
                                 workers.append(Data.WORKERS_REFINERIES[i])
-                            for rogue in Data.GAS_WORKER:
-                                if rogue.id not in workers:
-                                    Data.GAS_WORKER.remove(rogue.id)
-                                    return
 
                     except KeyError:
                         print(Data.WORKERS_REFINERIES.keys())
@@ -248,23 +252,22 @@ class Bot(MyAgent):
         if UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER in Data.NEUTRALUNITS and \
                 UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS and \
                 Bot.build_queue_open():
-
             TERRAN_REFINERY = UnitType(UNIT_TYPEID.TERRAN_REFINERY, self)
             builder = Bot.get_worker(self)
-            GEYSER = Bot.get_available_neutral_unit(UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER)
+
+            for GEYSER in Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER]:
+                    GEYSER = GEYSER
 
             if Bot.econ_check(self, TERRAN_REFINERY) and UNIT_TYPEID.TERRAN_REFINERY not in Data.AGENTUNITS:
                 builder.build_target(TERRAN_REFINERY, GEYSER)
                 Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].remove(GEYSER)
                 Data.BUILDER.append(builder)
                 return
-            else:
+            if Bot.econ_check(self, TERRAN_REFINERY) and len(Data.GAS_WORKER) >= 3 and \
+                    UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS:
+                builder.build_target(TERRAN_REFINERY, GEYSER)
+                Data.BUILDER.append(builder)
                 return
-                if Bot.econ_check(self, TERRAN_REFINERY) and len(Data.GAS_WORKER) == 3:
-                    builder.build_target(TERRAN_REFINERY, GEYSER)
-                    Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].remove(GEYSER)
-                    Data.BUILDER.append(builder)
-                    return
 
     def make_barracks(self):
         """makes barracks"""
@@ -583,11 +586,18 @@ class Bot(MyAgent):
 
         if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
 
+
+
             ramp = Data.wall_positions(self, 2)
             if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) >= 8:
                 for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE][0:8]:
                     if not Bot.near(self, marine.position, Point2D(ramp[0], ramp[1]), 5):
                         marine.move(Point2D(ramp[0], ramp[1]))
+                    elif Bot.near(self, marine.position, Point2D(ramp[0], ramp[1]), 5) and \
+                        marine not in Data.DEFENDER["ramp"]:
+
+                        Data.DEFENDER["ramp"].append(marine)
+
                     else:
                         continue
 
@@ -895,20 +905,34 @@ class Bot(MyAgent):
 
     def unit_task(self):
 
+        task = ""
+        mapdraw = self.map_tools.draw_text_screen
         for unit in self.get_my_units():
             if unit.unit_type.is_building:
                 continue
             elif unit.unit_type.is_worker:
                 if unit in Data.MINERAL_WORKER:
                     task = "minerals"
+                    mapdraw(0.02, 0.033, "On Minerals:" + str(len(Data.MINERAL_WORKER)), Color(100, 200, 255))
                 elif unit in Data.GAS_WORKER:
                     task = "gas"
+                    mapdraw(0.02, 0.046, "On Gas:" + str(len(Data.GAS_WORKER)), Color(100, 200, 255))
                 elif Bot.is_building(self, unit):
                     task = Bot.is_building_name(self, unit)
+                    mapdraw(0.02, 0.059, str(task), Color(100, 200, 255))
                 else:
                     task = "Bruh"
+            elif unit.unit_type.is_combat_unit:
+                if unit in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]:
+                    task = "marine"
+                    mapdraw(0.02, 0.085, str(task), Color(100, 200, 255))
+                if unit in Data.DEFENDER["ramp"]:
+                    task = "defence"
+                    mapdraw(0.02, 0.072, "Marines:" + str(task), Color(100, 200, 255))
+
             else:
                 task = ''
+
 
             type = unit.unit_type.unit_typeid
             pos = Data.AGENTUNITS[type].index(unit)
@@ -947,7 +971,7 @@ class Bot(MyAgent):
                     Bot.Debug_info[0] = ["Added" + str(type) + 'To Neutral dictionary']
                 elif unit not in Data.NEUTRALUNITS[type]:
                     Data.NEUTRALUNITS[type].append(unit)
-        pos = Data.NEUTRALUNITS[type].index(unit)
+        #pos = Data.NEUTRALUNITS[type].index(unit)
         gas_deposits = self.base_location_manager.get_player_starting_base_location(0).geysers
 
 
@@ -1009,13 +1033,13 @@ class Bot(MyAgent):
         mapdraw = self.map_tools.draw_text_screen
 
         mapdraw(0.02, 0.020, "----AGENTDATA----", Color(100, 200, 255))
-        mapdraw(0.02, 0.033, "Minerals Spent:" + str(Data.total_value(self)[0]), Color(100, 200, 255))
-        mapdraw(0.02, 0.046, "Gas Spent:" + str(Data.total_value(self)[1]), Color(100, 200, 255))
-        mapdraw(0.02, 0.059, "Minerals Lost:" + str(Data.AGENT_LOST[0]), Color(100, 200, 255))
-        mapdraw(0.02, 0.072, "Gas Lost:" + str(Data.AGENT_LOST[1]), Color(100, 200, 255))
-        mapdraw(0.02, 0.085, "Workers:" + str(len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV])), Color(100, 200, 255))
-        mapdraw(0.02, 0.098, "On Minerals:" + str(len(Data.MINERAL_WORKER)), Color(100, 200, 255))
-        mapdraw(0.02, 0.111, "On Gas:" + str(len(Data.GAS_WORKER)), Color(100, 200, 255))
+        #mapdraw(0.02, 0.033, "Minerals Spent:" + str(Data.total_value(self)[0]), Color(100, 200, 255))
+        #mapdraw(0.02, 0.046, "Gas Spent:" + str(Data.total_value(self)[1]), Color(100, 200, 255))
+        #mapdraw(0.02, 0.059, "Minerals Lost:" + str(Data.AGENT_LOST[0]), Color(100, 200, 255))
+        #mapdraw(0.02, 0.072, "Gas Lost:" + str(Data.AGENT_LOST[1]), Color(100, 200, 255))
+        #mapdraw(0.02, 0.085, "Workers:" + str(len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV])), Color(100, 200, 255))
+
+
 
         mapdraw(0.02, 0.130, "----ENEMYDATA----", Color(255, 100, 0))
         mapdraw(0.02, 0.143, "Enemy Minerals Spent:" + str(Data.enemy_total_value(self)[0]), Color(255, 100, 0))
@@ -1030,6 +1054,12 @@ class Bot(MyAgent):
         # mapdraw(0.02, 0.63, "Unused Supply:" + str(self.max_supply - self.current_supply), Color(100, 200, 255))
         mapdraw(0.02, 0.645, "Runtime " + str(round(runtime, 0)), Color(100, 200, 255))
         mapdraw(0.02, 0.66, "Performance: " + str(int(performance)) + " Loops / Second", Color(100, 200, 255))
+
+    def map_info(self):
+
+        maptext = self.map_tools.draw_text
+        ramp = Data.wall_positions(self, 2)
+        maptext(Point2D(ramp[0], ramp[1]), str("Defence position"), Color(255, 255, 255))
 
     def debug_info(self):
         pass

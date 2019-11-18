@@ -21,6 +21,10 @@ TODO:
 
 --  Fixa klassen UnitData så att metoder kan anropa och använda dictionaries med unit-information i som klassen håller
 
+--  Fixa gas_worker_handler sådan att mineralen som väljs i fallet att x>y är allmän för alla mineraler??!?!?!?
+
+-- Se till att vi har rätt saker som printas i mapdraw. Loopa genom saker som byggs?
+
 --------------------------------------------------------------------------------------
 
 FÖRSLAG

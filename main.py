@@ -34,6 +34,7 @@ class MyAgent(IDABot):
         Bot.enemy_debug(self)  # DEBUG
         Bot.debug_info(self)
         Bot.unit_task(self)
+        Bot.map_info(self)
 
         Bot.clear_build_list(self)  # DATA HANDLER
         Bot.build_queue()  # DATA HANDLER

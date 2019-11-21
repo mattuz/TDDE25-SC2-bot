@@ -10,8 +10,8 @@
 --
 -- Kommer ni på andra saker att lägga till så bara skriv ner det här! :)
 ----------------------------------------------------------
-
 11/11, Grupp
+
 Ny Bot-metod: Bot.work_ref, ska hantera alla refineries och sköta worker-placeringar så att refineries inte tar emot fler
 än 3 workers. Använder dictionaryn Data.WORKER_REFINERIES för data-hantering
 
@@ -21,8 +21,8 @@ att workern samlar gas.
 Många steg i Bot.worker_handler har hashats ut!
 
 ------------------------------------------------------------
-
 14/11, Grupp
+
 Fixade 'typ' refinery hanteringen
 Fick marines att springa till choke
 Nya prints baserat på tasks
@@ -30,8 +30,29 @@ Nya prints baserat på tasks
 Ny metod: Build. Enklare hantering av bygg-prylar etc etc
 
 ------------------------------------------------------------
-
 17/11, Grupp
+
 Fixade refinery hantering typ-ish?
 Fixade text på defence-postition för marines
+
+---------------------------------------------------------
+20/11, Erik
+
+NOTERA: Många överflödiga metoder (i syftet att utföra uppgifterna) har flyttats från Bot och ligger nu i filen
+"bortstädade metoder"
+
+Ändrat datastrukturen "lite": Istället för flera att ha flera olika listor löst ligger nu många unit-specifika listor
+samlade i dedikerade dictionaries för motsvarande unit typ.
+Exempelvis ligger mineral workers nu under AGENT_WORKERS['MINERS'] osv.
+Funktionerna är precis samma som innan bortsett från att listorna kallas med andra namn!
+Motivationen är att dels korta ner antalet listor som används och för att koncentrera all data till ett fåtal punkter
+istället för att ha 302034 olika listor som flyter runt!
+
+Även flera mindre ändringar har gjorts i syftet att strukturera upp koden lite mer, är någonting oklart så fråga!
+
+----------------------------------------------------------
+21/11, Grupp
+
+Ah saker är fucked lol
+
 

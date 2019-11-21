@@ -5,11 +5,23 @@ from library import *
 class Data():
     """Data-class for MyAgent, more features to be added"""
 
-
     AGENTSTATE = {'STATE': 0, 'PURPOSE': 'OFFENCE', 'ROUTINE': 'UPKEEP', 'STRATEGY': 'BIOPRESSURE'}
-    MY_UNITS = {}
+
     AGENTUNITS = {}
+    AGENT_WORKER = {'MINERS': [], 'GAS': [], 'BUILDER': [], 'REPAIR': []}
+    AGENT_COMBATUNITS = {'DEFENCE': {}, 'OFFENCE': {}}
+    BASE_HANDLER = {}
+    #IN_CONSTRUCTION = {"Supply": [SCV_ID, ....], }
+
     AGENT_COMBAT_UNITS = {}
+
+    WORKERS_REFINERIES = {}
+
+
+
+
+
+
     AGENT_ECONOMY = [0, 0]
     AGENT_LOST = [0, 0]
 
@@ -21,8 +33,6 @@ class Data():
 
     MINERAL_WORKER = []
     GAS_WORKER = []
-    REFINERIES = []
-    WORKERS_REFINERIES = {}
     BUILDER = []
     BUILDQ = []
     ATTACKER = []
@@ -35,6 +45,10 @@ class Data():
 
     NE_BASE = (26.5, 137.5)
     SE_BASE = (125.5, 30.5)
+
+
+
+
 
     def __init__(self):
         pass

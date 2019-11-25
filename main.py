@@ -43,6 +43,7 @@ class MyAgent(IDABot):
         Bot.worker_task_checker(self)
 
         Bot.make_barracks(self)
+        Bot.building_bunker(self)
 
         Bot.state_listener(self)  # STATE HANDLER
         Bot.base_listener(self)  # STATE HANDLER
@@ -130,13 +131,13 @@ class MyAgent(IDABot):
 
 def main():
 
-    coordinator = Coordinator(r'E:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'D:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 
     participant_1 = create_participants(Race.Terran, bot1)
     # participant_2 = create_participants(Race.Terran, bot2)
-    participant_2 = create_computer(Race.Terran, Difficulty.Easy)
+    participant_2 = create_computer(Race.Terran, Difficulty.VeryEasy)
 
     coordinator.set_real_time(False)
     coordinator.set_participants([participant_1, participant_2])

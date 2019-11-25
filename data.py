@@ -36,7 +36,7 @@ class Data():
     BUILDER = []
     BUILDQ = []
     ATTACKER = []
-    DEFENDER = {"ramp": []}
+    DEFENDER = {"ramp": [], "choke": []}
     SCOUT = []
     enemies_in_base = []
     AGENTUPGRADES = []

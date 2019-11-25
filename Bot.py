@@ -49,7 +49,7 @@ class Bot(MyAgent):
             for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
 
                 if worker.is_alive and worker.has_target and not worker.is_idle and not Bot.is_building(self, worker):
-                    if worker.target in mineral_deposits and worker not in Data.AGENT_WORKER['MINERS']:
+                    if (worker.target in mineral_deposits or worker.target == Data.BASE_HANDLER[base]["BASE"]) and worker not in Data.AGENT_WORKER['MINERS']:
                         Data.AGENT_WORKER['MINERS'].append(worker)
                         Data.BASE_HANDLER[base]['MINERS'].append(worker)
                         return
@@ -58,12 +58,16 @@ class Bot(MyAgent):
                         Data.BASE_HANDLER[base]['GAS'].append(worker)
                         return
                     elif worker.target not in mineral_deposits \
-                            and worker.target is not Data.BASE_HANDLER[base]["BASE"] and worker in Data.AGENT_WORKER['MINERS']:
+                            and worker.target != Data.BASE_HANDLER[base]["BASE"] and worker in Data.AGENT_WORKER['MINERS']:
                         Data.AGENT_WORKER['MINERS'].remove(worker)
                         Data.BASE_HANDLER[base]['MINERS'].remove(worker)
                         return
+                    elif worker.target not in mineral_deposits \
+                        and worker.target in refineries and worker in Data.AGENT_WORKER['MINERS']:
+                        Data.AGENT_WORKER['MINERS'].remove(worker)
+                        Data.BASE_HANDLER['MINERS'].remove(worker)
                     elif worker.target not in refineries \
-                            and worker.target is not Data.BASE_HANDLER[base]["BASE"] and worker in Data.AGENT_WORKER['GAS']:
+                            and worker.target != Data.BASE_HANDLER[base]["BASE"] and worker in Data.AGENT_WORKER['GAS']:
                         Data.AGENT_WORKER['GAS'].remove(worker)
                         Data.BASE_HANDLER[base]['GAS'].remove(worker)
                         return
@@ -323,6 +327,40 @@ class Bot(MyAgent):
                     builder.build(TERRAN_COMMANDCENTER, Point2DI(x, y))
             except:
                 pass
+
+    def building_bunker(self):
+        """Builds bunkers, OBS: den hoppar över try av nån anledning"""
+        if len(Data.BUILDER) > 1:
+            return False
+
+        TERRAN_BUNKER = UnitType(UNIT_TYPEID.TERRAN_BUNKER, self)
+        builder = Bot.get_worker(self)
+
+        try:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) ==  1:
+                #2 and \
+                #    len(Data.DEFENDER["choke"]) >= 8:
+                if Bot.econ_check(self, TERRAN_BUNKER):
+                    if Data.start_base(self) == 'NE':
+                        x = 45
+                        y = 102
+                    else:
+                        x = 107
+                        y = 67
+                    builder.build(TERRAN_BUNKER, Point2DI(x, y))
+        except:
+            print("Ni fattar väl att jag inte kan bygga här va? LOL XD")
+            pass
+        try:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER]) >= 1 and Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE] >= 8:
+                marines = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE][8:]
+                for marine in marines:
+                    marine.right_click(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0])
+                    return
+        except:
+
+            pass
+
 
 
 
@@ -645,7 +683,17 @@ class Bot(MyAgent):
 
                     elif unit in Data.BUILDER:
                         task = Bot.is_building_name(self, unit)
-                        mapdraw(0.02, 0.059, str('Building' + task), Color(100, 200, 255))
+                        if len(Data.BUILDER) == 1:
+                            mapdraw(0.02, 0.059, str(task) + ": 1", Color(100, 200, 255))
+                        if len(Data.BUILDER) == 2:
+                            task1 = Bot.is_building_name(self, Data.BUILDER[0])
+                            task2 = Bot.is_building_name(self, Data.BUILDER[1])
+                            if task1 == task2:
+                                mapdraw(0.02, 0.059, str(task1) + ": 2", Color(100, 200, 255))
+                            else:
+                                mapdraw(0.02, 0.059, str(task1) + ": 1", Color(100, 200, 255))
+                                mapdraw(0.02, 0.072, str(task2) + ": 1", Color(100, 200, 255))
+
                     else:
                         task = "ERROR 404 - Task Not Found"
 
@@ -801,9 +849,8 @@ class Bot(MyAgent):
     def base_handler(self):
 
         for base in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]:
-            if str(base.unit_type.name + str(len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]))) not in Data.BASE_HANDLER:
-                Data.BASE_HANDLER.update({str(base.unit_type.name + str(len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]))):
-                                              {'MINERS': [], 'GAS': [], 'WORKERS': [], 'BUILDING': [], 'BASE': base}})
+            if base not in Data.BASE_HANDLER:
+                Data.BASE_HANDLER.update({base: {'MINERS': [], 'GAS': [], 'WORKERS': [], 'BUILDING': [], 'BASE': base}})
 
     def state_listener(self):
         """listens to current AgentState"""

@@ -43,6 +43,7 @@ class MyAgent(IDABot):
         Bot.worker_task_checker(self)
 
         Bot.make_barracks(self)
+        Bot.make_factory(self)
         Bot.building_bunker(self)
 
         Bot.state_listener(self)  # STATE HANDLER
@@ -66,7 +67,9 @@ class MyAgent(IDABot):
             if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS:
                 Bot.barracks_upgrade(self)  # BOT ACTION
                 Bot.make_marines(self)  # BOT ACTION
+                Bot.make_siege(self)
                 Bot.expand(self)
+                Bot.factory_upgrade(self)
                 #Bot.make_marauder(self)
                 #Bot.make_engineering_bay(self)  # BOT ACTION
         #

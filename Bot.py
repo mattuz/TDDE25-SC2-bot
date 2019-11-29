@@ -155,12 +155,9 @@ class Bot(MyAgent):
                 #while True:
                 #    pass
                 #print(Data.BASE_HANDLER[base])
-                if len(Data.BASE_HANDLER[base]['MINERS']) < 16 and Bot.econ_check(self, TERRAN_SCV) and not Data.BASE_HANDLER[base]['BASE'].is_training:
+                if len(Data.BASE_HANDLER[base]['WORKERS']) < 22 and Bot.econ_check(self, TERRAN_SCV) and not Data.BASE_HANDLER[base]['BASE'].is_training:
                     Data.BASE_HANDLER[base]['BASE'].train(TERRAN_SCV)
-                elif UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS:
-                    if (len(Data.BASE_HANDLER[base]['GAS']) < len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]) * 3) and \
-                            Bot.econ_check(self, TERRAN_SCV) == True and not Data.BASE_HANDLER[base]['BASE'].is_training:
-                        Data.BASE_HANDLER[base]['BASE'].train(TERRAN_SCV)
+
 
     def make_refinery(self):
         """Builds refineries at nearby vespene geysers"""
@@ -170,7 +167,7 @@ class Bot(MyAgent):
 
         if UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER in Data.NEUTRALUNITS and \
                 UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS and \
-                Bot.build_queue_open():
+                Bot.build_queue_open(self):
             TERRAN_REFINERY = UnitType(UNIT_TYPEID.TERRAN_REFINERY, self)
             builder = Bot.get_worker(self)
 
@@ -303,14 +300,14 @@ class Bot(MyAgent):
                         self.minerals < 400:
                     return
 
-            if Bot.supply_check(self) and Bot.build_queue_open():
+            if Bot.supply_check(self) and Bot.build_queue_open(self):
                 TERRAN_SUPPLYDEPOT = UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self)
                 if Bot.econ_check(self, TERRAN_SUPPLYDEPOT):
                     pos_x = int(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.x)
                     pos_y = int(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.y)
                     builder = Bot.get_worker(self)
 
-                    build_pos = Bot.find_build_target(self, pos_x, pos_y, TERRAN_SUPPLYDEPOT, 0, 10)
+                    build_pos = Bot.find_build_target(self, pos_x, pos_y, TERRAN_SUPPLYDEPOT, 0, 20)
 
                     if build_pos is False:
                         return False
@@ -636,9 +633,13 @@ class Bot(MyAgent):
                     if not unit.is_alive:
                         Data.AGENT_COMBATUNITS[types].remove(unit)
 
-    @staticmethod
-    def build_queue_open():
+
+    def build_queue_open(self):
         """Returns true if build queue is < 3"""
+
+        for worker in Data.BUILDER:
+            if not Bot.is_building(self, worker):
+                Data.BUILDER.remove(worker)
 
         if len(Data.BUILDQ) < 3:
             return True
@@ -654,8 +655,6 @@ class Bot(MyAgent):
 
     def build_queue(self):
         """Handles build queue"""
-
-
 
         types = len(list(Data.AGENTUNITS))
 
@@ -688,7 +687,7 @@ class Bot(MyAgent):
     def build(self, building: UnitType, near: Unit, range):
         """build(self: Bot, building: library.UnityType, near: library.Unit) -> None"""
 
-        if Bot.build_queue_open() and Bot.econ_check(self, building):
+        if Bot.build_queue_open(self) and Bot.econ_check(self, building):
             x = near.position.x
             y = near.position.y
             pos = Bot.find_build_target(self, x, y, building, range, 10)
@@ -824,11 +823,11 @@ class Bot(MyAgent):
 
                 for commandcenter in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]:
                     for resource in self.get_all_units():
-                        if not Bot.near(self, resource.position, commandcenter.position, 10):
+                        if not Bot.near(self, resource.position, commandcenter.position, 14):
                             continue
                         if resource.unit_type.is_mineral or resource.unit_type.is_geyser:
                             type = resource.unit_type.unit_typeid
-                            if Bot.near(self, resource.position, commandcenter.position, 10):
+                            if Bot.near(self, resource.position, commandcenter.position, 14):
                                 if resource not in Data.NEUTRALUNITS[type] and resource.unit_type.is_mineral:
                                     Data.NEUTRALUNITS[type].append(resource)
                                 if resource.unit_type.is_geyser:

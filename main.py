@@ -7,6 +7,7 @@ from Bot import *
 from data import *
 
 
+
 class MyAgent(IDABot):
 
     global init_time
@@ -29,47 +30,62 @@ class MyAgent(IDABot):
         "MAIN"
 
         "CO-ROUTINES"
+
         Bot.unit_debug(self)  # DEBUG
         Bot.neutral_debug(self)  # DEBUG
-        Bot.enemy_debug(self)  # DEBUG
+
+        if UNIT_TYPEID.NEUTRAL_MINERALFIELD and UNIT_TYPEID.NEUTRAL_MINERALFIELD750 in Data.NEUTRALUNITS:
+            Bot.base_handler(self)
+            Bot.mining_handler(self)
+            Bot.gas_handler(self)
+            Bot.worker_task_handler(self)
+            Bot.make_supply_depot(self)  # BOT ACTION
+            Bot.building_bunker(self)
+            Bot.make_marines(self)
+            Bot.barracks_upgrade(self)
+            Bot.make_refinery(self)
+            Bot.make_barracks(self)
+            if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
+                Bot.expand(self)
+
+
+        Bot.unit_debug(self)  # DEBUG
+        Bot.neutral_debug(self)  # DEBUG
+        #Bot.enemy_debug(self)  # DEBUG
         Bot.debug_info(self)
-        Bot.unit_task(self)
-        Bot.map_info(self)
-        Bot.base_handler(self)
+        #Bot.unit_task(self)
+        #Bot.map_info(self)
+        #Bot.base_handler(self)
 
-        Bot.clear_build_list(self)  # DATA HANDLER
-        Bot.build_queue(self)  # DATA HANDLER
-        Bot.unit_death_handler()  # DATA HANDLER
-        Bot.worker_task_checker(self)
+        #Bot.clear_build_list(self)  # DATA HANDLER
+        #Bot.build_queue(self)  # DATA HANDLER
+        #Bot.unit_death_handler()  # DATA HANDLER
+        #Bot.worker_tachecker(self)
 
-        Bot.make_barracks(self)
-        Bot.make_factory(self)
-        Bot.building_bunker(self)
+        #Bot.make_barracks(self)
 
         Bot.state_listener(self)  # STATE HANDLER
         Bot.base_listener(self)  # STATE HANDLER
         if Bot.enemy_attacking():
             Bot.state_setter('PURPOSE', 'DEFENCE')
 
-        Bot.mineral_worker_handler(self)  # BOT ACTION
-        Bot.gas_worker_handler(self)
-        Bot.make_supply_depot(self)  # BOT ACTION
+        #Bot.mineral_worker_handler(self)  # BOT ACTION
+        #Bot.gas_worker_handler(self)
+        #Bot.make_supply_depot(self)  # BOT ACTION
         Bot.make_workers(self)  # BOT ACTION
         Bot.move_marines_to_ramp(self)
 
 
-        "STATE-LOGIC"
-        if Data.AGENTSTATE['STATE'] == 0:
-
-            #Bot.send_scout(self)  # BOT ACTION
-            Bot.make_refinery(self)  # BOT ACTION
-            #Bot.make_barracks(self)  # BOT ACTION
-            if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS:
-                Bot.barracks_upgrade(self)  # BOT ACTION
-                Bot.make_marines(self)  # BOT ACTION
-                Bot.make_siege(self)
-                Bot.expand(self)
-                Bot.factory_upgrade(self)
+        # "STATE-LOGIC"
+        # if Data.AGENTSTATE['STATE'] == 0:
+        #
+        #     #Bot.send_scout(self)  # BOT ACTION
+        #     Bot.make_refinery(self)  # BOT ACTION
+        #     Bot.make_barracks(self)  # BOT ACTION
+        #     if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS:
+        #         Bot.barracks_upgrade(self)  # BOT ACTION
+        #         Bot.make_marines(self)  # BOT ACTION
+        #         Bot.expand(self)
                 #Bot.make_marauder(self)
                 #Bot.make_engineering_bay(self)  # BOT ACTION
         #
@@ -81,7 +97,7 @@ class MyAgent(IDABot):
         #         Bot.research_tech(self)  # BOT ACTION
         #         Bot.barracks_upgrade(self)  # BOT ACTION
         #         #Bot.make_armory
-        #         #Bot.expand_base
+                    #Bot.expand_base
         #         #Bot.make_starport
         #
         #     if Data.AGENTSTATE['STRATEGY'] == 'BIOPRESSURE':
@@ -140,7 +156,7 @@ def main():
 
     participant_1 = create_participants(Race.Terran, bot1)
     # participant_2 = create_participants(Race.Terran, bot2)
-    participant_2 = create_computer(Race.Terran, Difficulty.VeryEasy)
+    participant_2 = create_computer(Race.Terran, Difficulty.Easy)
 
     coordinator.set_real_time(False)
     coordinator.set_participants([participant_1, participant_2])

@@ -8,7 +8,7 @@ class Data():
     AGENTSTATE = {'STATE': 0, 'PURPOSE': 'OFFENCE', 'ROUTINE': 'UPKEEP', 'STRATEGY': 'BIOPRESSURE'}
 
     AGENTUNITS = {}
-    AGENT_WORKER = {'MINERS': [], 'GAS': [], 'BUILDER': [], 'REPAIR': []}
+    AGENT_WORKER = {'MINERS': [], 'GAS': [], 'BUILDER': [], 'REPAIR': [], 'ALL_WORKERS': []}
     AGENT_COMBATUNITS = {'DEFENCE': {}, 'OFFENCE': {}}
     BASE_HANDLER = {}
     #IN_CONSTRUCTION = {"Supply": [SCV_ID, ....], }
@@ -18,7 +18,7 @@ class Data():
     WORKERS_REFINERIES = {}
 
 
-
+    starting_position = property(lambda x: x)
 
 
 
@@ -36,7 +36,7 @@ class Data():
     BUILDER = []
     BUILDQ = []
     ATTACKER = []
-    DEFENDER = {"ramp": [], "choke": []}
+    DEFENDER = {"ramp": []}
     SCOUT = []
     enemies_in_base = []
     AGENTUPGRADES = []

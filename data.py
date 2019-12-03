@@ -11,30 +11,32 @@ class Data():
     AGENT_WORKER = {'MINERS': [], 'GAS': [], 'BUILDER': [], 'REPAIR': [], 'ALL_WORKERS': []}
     AGENT_COMBATUNITS = {'DEFENCE': {}, 'OFFENCE': {}}
     BASE_HANDLER = {}
+
+    NEUTRALUNITS = {}
+    ENEMYUNITS = {}
+
+    QUEUED_BUILDINGS = []
+    BUILDQ = {}
+
+
+
+
+
+
+
     #IN_CONSTRUCTION = {"Supply": [SCV_ID, ....], }
 
     AGENT_COMBAT_UNITS = {}
-
     WORKERS_REFINERIES = {}
-
-
-    starting_position = property(lambda x: x)
-
-
-
     AGENT_ECONOMY = [0, 0]
     AGENT_LOST = [0, 0]
 
-    NEUTRALUNITS = {}
-
-    ENEMYUNITS = {}
     ENEMY_ECONOMY = [0, 0]
     ENEMY_LOST = [0, 0]
-
     MINERAL_WORKER = []
     GAS_WORKER = []
     BUILDER = []
-    BUILDQ = []
+
     ATTACKER = []
     DEFENDER = {"ramp": []}
     SCOUT = []

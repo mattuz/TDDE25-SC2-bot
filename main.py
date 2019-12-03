@@ -36,44 +36,46 @@ class MyAgent(IDABot):
 
         if UNIT_TYPEID.NEUTRAL_MINERALFIELD and UNIT_TYPEID.NEUTRAL_MINERALFIELD750 in Data.NEUTRALUNITS:
             Bot.base_handler(self)
-            Bot.mining_handler(self)
-            Bot.gas_handler(self)
+            Bot.mineral_worker_handler(self)
+            Bot.gas_worker_handler(self)
             Bot.worker_task_handler(self)
             Bot.make_supply_depot(self)  # BOT ACTION
-            Bot.building_bunker(self)
+            #Bot.make_bunker(self)
             Bot.make_marines(self)
             Bot.barracks_upgrade(self)
             Bot.make_refinery(self)
             Bot.make_barracks(self)
+            Bot.make_workers(self)
+            #Bot.move_marines_to_ramp(self)
+            Bot.map_info(self)
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
-                Bot.expand(self)
+                Bot.make_expansion(self)
+                #Bot.stray_worker_handling(self)
 
 
-        Bot.unit_debug(self)  # DEBUG
-        Bot.neutral_debug(self)  # DEBUG
+
         #Bot.enemy_debug(self)  # DEBUG
-        Bot.debug_info(self)
         #Bot.unit_task(self)
-        #Bot.map_info(self)
+
         #Bot.base_handler(self)
 
         #Bot.clear_build_list(self)  # DATA HANDLER
         #Bot.build_queue(self)  # DATA HANDLER
-        #Bot.unit_death_handler()  # DATA HANDLER
+        #Bot.unit_death_handler(self)  # DATA HANDLER
         #Bot.worker_tachecker(self)
 
         #Bot.make_barracks(self)
 
         Bot.state_listener(self)  # STATE HANDLER
         Bot.base_listener(self)  # STATE HANDLER
-        if Bot.enemy_attacking():
-            Bot.state_setter('PURPOSE', 'DEFENCE')
+        #if Bot.enemy_attacking(self):
+            #Bot.state_setter('PURPOSE', 'DEFENCE')
 
         #Bot.mineral_worker_handler(self)  # BOT ACTION
         #Bot.gas_worker_handler(self)
         #Bot.make_supply_depot(self)  # BOT ACTION
-        Bot.make_workers(self)  # BOT ACTION
-        Bot.move_marines_to_ramp(self)
+         # BOT ACTION
+
 
 
         # "STATE-LOGIC"
@@ -85,7 +87,7 @@ class MyAgent(IDABot):
         #     if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS:
         #         Bot.barracks_upgrade(self)  # BOT ACTION
         #         Bot.make_marines(self)  # BOT ACTION
-        #         Bot.expand(self)
+        #         Bot.make_expansion(self)
                 #Bot.make_marauder(self)
                 #Bot.make_engineering_bay(self)  # BOT ACTION
         #
@@ -150,7 +152,7 @@ class MyAgent(IDABot):
 
 def main():
 
-    coordinator = Coordinator(r'D:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'F:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

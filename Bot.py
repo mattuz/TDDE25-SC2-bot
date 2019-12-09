@@ -35,27 +35,29 @@ class Bot(MyAgent):
 
             gas = Data.BASE_HANDLER[base]['GAS']
             base_unit = Data.BASE_HANDLER[base]['BASE']
-
             geysers = Data.BASE_HANDLER[base]['GEYSERS']
 
-            if (UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER or UNIT_TYPEID.NEUTRAL_VESPENEGEYSER) in Data.NEUTRALUNITS \
-                    and len(gas) < 2:
+            if len(gas) == 2:
+                continue
 
-                TERRAN_REFINERY = UnitType(UNIT_TYPEID.TERRAN_REFINERY, self)
-                builder = Bot.get_worker(self)
+            TERRAN_REFINERY = UnitType(UNIT_TYPEID.TERRAN_REFINERY, self)
+            builder = Bot.get_worker(self)
 
-                for geyser in geysers:
-                    if Bot.near(self, base_unit.position, geyser.position, 14):
-                        if UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS:
-                            for refinery in Bot.get_agentunits_near(self, base_unit, UNIT_TYPEID.TERRAN_REFINERY, 13):
-                                if refinery.id not in gas:
-                                    Data.BASE_HANDLER[base]['GAS'].update({refinery.id: []})
-                                elif refinery.position.x != geyser.position.x and refinery.position.y != geyser.position.y:
-                                    builder.build_target(TERRAN_REFINERY, geyser)
-                                    return
-                        else:
+            for geyser in geysers:
+                if Bot.near(self, base_unit.position, geyser.position, 14):
+                    if UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS:
+                        if len(Bot.get_agentunits_near(self, base_unit, UNIT_TYPEID.TERRAN_REFINERY, 13)) == 0:
                             builder.build_target(TERRAN_REFINERY, geyser)
                             return
+                        for refinery in Bot.get_agentunits_near(self, base_unit, UNIT_TYPEID.TERRAN_REFINERY, 13):
+                            if refinery.id not in gas:
+                                Data.BASE_HANDLER[base]['GAS'].update({refinery.id: []})
+                            elif refinery.position.x != geyser.position.x and refinery.position.y != geyser.position.y:
+                                builder.build_target(TERRAN_REFINERY, geyser)
+                                return
+                    else:
+                        builder.build_target(TERRAN_REFINERY, geyser)
+                        return
             else:
                 continue
 

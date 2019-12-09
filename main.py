@@ -58,8 +58,8 @@ class MyAgent(IDABot):
 
 
 
-        #Bot.enemy_debug(self)  # DEBUG
-        #Bot.unit_task(self)
+        Bot.enemy_debug(self)  # DEBUG
+        Bot.unit_task(self)
 
         #Bot.base_handler(self)
 

@@ -36,7 +36,7 @@ class Bot(MyAgent):
             gas = Data.BASE_HANDLER[base]['GAS']
             base_unit = Data.BASE_HANDLER[base]['BASE']
 
-            geysers = mineral_deposits = Data.BASE_HANDLER[base]['GEYSERS']
+            geysers = Data.BASE_HANDLER[base]['GEYSERS']
 
             if (UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER or UNIT_TYPEID.NEUTRAL_VESPENEGEYSER) in Data.NEUTRALUNITS \
                     and len(gas) < 2:
@@ -377,7 +377,7 @@ class Bot(MyAgent):
                 mineral_workers = Data.BASE_HANDLER[base]['MINERS']
                 base_workers = Data.BASE_HANDLER[base]['WORKERS']
                 base_unit = Data.BASE_HANDLER[base]['BASE']  # UNIT
-                base_gas = Data.BASE_HANDLER[base]['GAS']
+
 
                 if len(mineral_workers) < 14:
                     return
@@ -580,10 +580,36 @@ class Bot(MyAgent):
 
         for x in self.base_location_manager.get_occupied_base_locations(0):
             for base in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]:
+
+                if not Bot.near(self, x.position, base.position, 10):
+                    continue
+
+                def get_mineral_fields(self, base_location: BaseLocation):
+                    """ Given a base_location, this method will find and return a list of all mineral fields (Unit) for that base """
+                    mineral_fields = []
+                    for mineral_field in base_location.minerals:
+                        for unit in self.get_all_units():
+                            if unit.unit_type.is_mineral \
+                                    and mineral_field.tile_position.x == unit.tile_position.x \
+                                    and mineral_field.tile_position.y == unit.tile_position.y:
+                                mineral_fields.append(unit)
+                    return mineral_fields
+
+                def get_geysers(self, base_location: BaseLocation):
+                    geysers = []
+                    for geyser in base_location.geysers:
+                        for unit in self.get_all_units():
+                            if unit.unit_type.is_geyser \
+                                    and geyser.tile_position.x == unit.tile_position.x \
+                                    and geyser.tile_position.y == unit.tile_position.y:
+                                geysers.append(unit)
+                    return geysers
+
                 if base.id not in Data.BASE_HANDLER and \
                         math.sqrt((base.position.x - x.position.x) ** 2 + (base.position.y - x.position.y) ** 2) < 5:
                     Data.BASE_HANDLER.update({base.id:{'MINERS': [], 'GAS': {}, 'WORKERS': [], 'BUILDERS': [],\
-                        'BASE': base, 'MINERALS':x.minerals, 'GEYSERS':x.geysers}})
+                        'BASE': base, 'MINERALS':get_mineral_fields(self, x), 'GEYSERS':get_geysers(self, x)}})
+                    return
 
         for base in Data.BASE_HANDLER:
 
@@ -1061,111 +1087,29 @@ class Bot(MyAgent):
     def neutral_debug(self):
         """"Prints a debug message over neutral units, also adds each unit to gamestate.AGENTUNITS dictionary"""
 
-        try:
-            if len(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD]) < 4 * len(
-                    Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) and \
-                    len(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_MINERALFIELD750]) < 4 * len(
-                Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) and \
-                    len(Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER]) < 2 * len(
-                Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) and \
-                    Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][-1].is_completed:
+        if not Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][-1].is_completed:
+            return
 
-                for base in self.base_location_manager.get_occupied_base_locations(0):
+        for base in self.base_location_manager.get_occupied_base_locations(0):
 
-                    def get_mineral_fields(self, base_location: BaseLocation) -> List[Unit]:
-                        """ Given a base_location, this method will find and return a list of all mineral fields (Unit) for that base """
-                        mineral_fields = []
-                        for mineral_field in base_location.mineral_fields:
-                            for unit in self.get_all_units():
-                                if unit.unit_type.is_mineral \
-                                        and mineral_field.tile_position.x == unit.tile_position.x \
-                                        and mineral_field.tile_position.y == unit.tile_position.y:
-                                    mineral_fields.append(unit)
-                        return mineral_fields
-
-                    a = get_mineral_fields(base)
-                    for mineral in a:
-                        if mineral not in Data.NEUTRALUNITS[mineral.unit_type.unit_typeid]:
-                            Data.NEUTRALUNITS[mineral.unit_type.unit_typeid].append(mineral)
-
-                    def get_geysers(self, base_location: BaseLocation) -> List[Unit]:
-                        geysers = []
-                        for geyser in base_location.geysers:
-                            for unit in self.get_all_units():
-                                if unit.unit_type.is_geyser \
-                                        and geyser.tile_position.x == unit.tile_position.x \
-                                        and geyser.tile_position.y == unit.tile_position.y:
-                                    geysers.append(unit)
-                        return geysers
-
-                    b = get_geysers(base)
-                    for geyser in b:
-                        if geyser not in Data.NEUTRALUNITS[geyser.unit_type.unit_typeid]:
-                            Data.NEUTRALUNITS[geyser.unit_type.unit_typeid].append(geyser)
-
-
-
-                # for base in self.base_location_manager.get_occupied_base_locations(0):
-                #
-                #     def get_mineral_fields(self, base_location: BaseLocation):
-                #
-                #         for mineral_field in base_location.mineral_fields:
-                #             if mineral_field not in Data.NEUTRALUNITS[mineral_field.unit_type.unit_typeid]:
-                #                 Data.NEUTRALUNITS[mineral_field.unit_type.unit_typeid].append(mineral_field)
-                #
-                #     get_mineral_fields(self, base)
-                #
-                #     def get_geysers(self, base_location: BaseLocation):
-                #
-                #         for geyser in base_location.geysers:
-                #             if geyser not in Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER]:
-                #                 Data.NEUTRALUNITS[UNIT_TYPEID.NEUTRAL_SPACEPLATFORMGEYSER].append(geyser)
-                #
-                #     get_geysers(self, base)
-                # return
-
-
-        except Exception as e:
-            """ONLY RUNS ONCE WHEN THE GAME STARTS"""
-            mineral_deposits = self.base_location_manager.get_player_starting_base_location(0).minerals
-            for unit in mineral_deposits:
-                type = unit.unit_type.unit_typeid
+            for mineral in base.mineral_fields:
+                if not mineral.unit_type.is_mineral:
+                    continue
+                type = mineral.unit_type.unit_typeid
                 if type not in Data.NEUTRALUNITS:
-                    Data.NEUTRALUNITS.update({type: [unit]})
-                elif unit not in Data.NEUTRALUNITS[type]:
-                    Data.NEUTRALUNITS[type].append(unit)
-        # pos = Data.NEUTRALUNITS[type].index(unit)
-        gas_deposits = self.base_location_manager.get_player_starting_base_location(0).geysers
+                    Data.NEUTRALUNITS.update({type: []})
+                elif mineral not in Data.NEUTRALUNITS[type]:
+                    Data.NEUTRALUNITS[type].append(mineral)
 
-        # self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
-        #                         Color(255, 255, 255))
+            for geyser in base.geysers:
+                if not geyser.unit_type.is_geyser:
+                    continue
+                type = geyser.unit_type.unit_typeid
+                if type not in Data.NEUTRALUNITS:
+                    Data.NEUTRALUNITS.update({type: []})
+                elif geyser not in Data.NEUTRALUNITS[type]:
+                    Data.NEUTRALUNITS[type].append(geyser)
 
-        # self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
-        #                         Color(255, 255, 255))
-
-        for unit in gas_deposits:
-            """CHANGES NAME OF DEBUG PRINT FROM GEYSER TO REFINERY"""
-
-            type = unit.unit_type.unit_typeid
-
-            if type not in Data.NEUTRALUNITS:
-                Data.NEUTRALUNITS.update({type: [unit]})
-            elif unit not in Data.NEUTRALUNITS[type]:
-                Data.NEUTRALUNITS[type].append(unit)
-
-            pos = Data.NEUTRALUNITS[type].index(unit)
-
-            if UNIT_TYPEID.TERRAN_REFINERY in Data.AGENTUNITS:
-                for refinery in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY]:
-                    if refinery.position.x == unit.position.x:
-                        unit = refinery
-                        pos = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_REFINERY].index(refinery)
-
-            self.map_tools.draw_text(unit.position, (str(unit.unit_type) + "id: " + str(unit.id) + " i: " + str(pos)),
-                                     Color(255, 255, 255))
-
-            # self.map_tools.draw_text(unit.position, (str(unit.unit_type.unit_typeid)[12::] + " Nr:" + str(pos)),
-            #                         Color(255, 255, 255))
 
     def enemy_debug(self):
         """Gathers enemy units and adds them to Data.ENEMYUNITS"""

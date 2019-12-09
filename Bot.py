@@ -95,6 +95,7 @@ class Bot(MyAgent):
                 UNIT_TYPEID.TERRAN_FACTORY not in Data.AGENTUNITS:
             TERRAN_FACTORY = UnitType(UNIT_TYPEID.TERRAN_FACTORY, self)
             base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
+            Bot.build(self, TERRAN_FACTORY, base, 0)
 
     def make_expansion(self):
         """Expands the base when requirements are met"""
@@ -313,6 +314,44 @@ class Bot(MyAgent):
                         Data.AGENT_COMBATUNITS['DEFENCE']['RAMP'].append(marine)
                     else:
                         continue
+
+    def move_siege_to_defend(self):
+
+        if UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS:
+
+            army = Data.AGENT_COMBATUNITS['DEFENCE']
+            ramp = Data.wall_positions(self, 2)
+
+            if Data.start_base(self) == 'NE':
+
+                x = 45
+                y = 102
+            else:
+
+                x = 107
+                y = 67
+
+            if len(army['RAMP']) >= 8 and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) >= 2:
+                for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK][0:2]:
+                    if not Bot.near(self, siegetank.position, Point2D(ramp[0], ramp[1]), 5):
+                        siegetank.move(Point2D(ramp[0], ramp[1]))
+                    elif Bot.near(self, siegetank.position, Point2D(ramp[0], ramp[1]), 5) and \
+                        siegetank not in Data.AGENT_COMBATUNITS['DEFENCE']['RAMP']:
+                        Data.AGENT_COMBATUNITS['DEFENCE']['RAMP'].append(siegetank)
+                    else:
+                        continue
+
+            if len(army['CHOKE']) >= 4 and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) >= 4:
+                for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK][2:4]:
+                    if not Bot.near(self, siegetank.position, Point2D(x, y), 5):
+                        siegetank.move(Point2D(x, y))
+                    elif Bot.near(self, siegetank.position, Point2D(x, y), 5) and \
+                        siegetank not in army['CHOKE']:
+                        army['CHOKE'].append(siegetank)
+                        #Unit.morph(self, UNIT_TYPEID.TERRAN_SIEGETANKSIEGED)
+                    else:
+                        pass
+
 
     """---  Combat Specific  ---"""
 

@@ -52,6 +52,7 @@ class MyAgent(IDABot):
             Bot.factory_upgrade(self)
             Bot.make_siegetanks(self)
             Bot.map_info(self)
+            Bot.lower_supply(self)
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
                 Bot.make_expansion(self)
                 #Bot.stray_worker_handling(self)
@@ -156,7 +157,7 @@ class MyAgent(IDABot):
 
 def main():
 
-    coordinator = Coordinator(r'D:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'F:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

@@ -609,13 +609,18 @@ class Bot(MyAgent):
 
     def stray_worker_handling(self) -> None:
 
+        mineral_deposits = Data.BASE_HANDLER[base]['MINERALS']
+
         for worker in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
             if not worker.is_idle or Bot.is_building(self, worker):
                 continue
-            if worker not in Bot.all_workers(self):
-                for base in Data.BASE_HANDLER:
-                    if len(Data.BASE_HANDLER[base]['WORKERS']) < 22:
-                        worker.move(Data.BASE_HANDLER[base]['BASE'].position)
+            if worker not in Bot.all_workers(self) and Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position,
+                         worker.position, 5):
+                worker.move(Data.BASE_HANDLER[base]['BASE'].position)
+               # for base in Data.BASE_HANDLER:
+               #      if len(Data.BASE_HANDLER[base]['WORKERS']) < 22:
+               #          for mineral in mineral_deposits:
+               #              worker.right_click(minerals)
 
     def base_handler(self) -> None:
 
@@ -797,6 +802,19 @@ class Bot(MyAgent):
                 return False
 
     """---  Building Related    ---"""
+
+    def lower_supply(self):
+        """Lowers every supplydepot"""
+
+        if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
+            for supply in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SUPPLYDEPOT]:
+                if supply.build_percentage == 1:
+                    supply.ability(ABILITY_ID.MORPH_SUPPLYDEPOT_LOWER)
+                else:
+                    pass
+        else:
+            pass
+
 
     def build(self, building: UnitType, near: Unit, range) -> None:
         """build(self: Bot, building: library.UnityType, near: library.Unit) -> None"""

@@ -64,7 +64,7 @@ class MyAgent(IDABot):
 
         #Bot.base_handler(self)
 
-        #Bot.clear_build_list(self)  # DATA HANDLER
+        Bot.clear_build_list(self)  # DATA HANDLER
         #Bot.build_queue(self)  # DATA HANDLER
         #Bot.unit_death_handler(self)  # DATA HANDLER
         #Bot.worker_tachecker(self)
@@ -157,7 +157,7 @@ class MyAgent(IDABot):
 
 def main():
 
-    coordinator = Coordinator(r'F:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'E:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

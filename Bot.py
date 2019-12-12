@@ -574,8 +574,8 @@ class Bot(MyAgent):
 
                 """///CLEARS OUT STRAY WORKERS"""
                 if Bot.distance_to(self, base_unit, worker) > 20:
-                    if worker in Bot.build_queue(self):
-                        continue
+                    #if worker in Bot.build_queue(self):
+                    #    continue
                     Data.BASE_HANDLER[base]['WORKERS'].remove(worker)
                     if worker in Data.BASE_HANDLER[base]['MINERS']:
                         Data.BASE_HANDLER[base]['MINERS'].remove(worker)

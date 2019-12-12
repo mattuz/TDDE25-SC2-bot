@@ -55,6 +55,9 @@ class MyAgent(IDABot):
             Bot.send_scout(self)
             Bot.upgrade_orbital_command(self)
             Bot.lower_supply(self)
+
+            Bot.unit_attack_handler(self)
+
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
                 Bot.make_expansion(self)
                 #Bot.stray_worker_handling(self)

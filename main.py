@@ -50,8 +50,10 @@ class MyAgent(IDABot):
             Bot.move_siege_to_defend(self)
             Bot.make_factory(self)
             Bot.factory_upgrade(self)
-            Bot.make_siegetanks(self)
+            Bot.make_siege_tanks(self)
             Bot.map_info(self)
+            Bot.send_scout(self)
+            Bot.upgrade_orbital_command(self)
             Bot.lower_supply(self)
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
                 Bot.make_expansion(self)
@@ -151,13 +153,13 @@ class MyAgent(IDABot):
 
 
 
-        performance = 0 #60 / (time.time() - start)
+        performance = 60 / (time.time() - start)
         Bot.session_info(self, runtime, performance)  # GRAPHICS
 
 
 def main():
 
-    coordinator = Coordinator(r'E:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'F:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

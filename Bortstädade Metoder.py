@@ -118,61 +118,11 @@ def marauder_charge(self):
                 if attacker.is_idle:
                     attacker.attack_move(Point2D(opponent_base_x, opponent_base_y))
 
-def send_scout(self):
-        """Sends a scout to gather intel"""
 
-        if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]) > 15 and len(Data.SCOUT) < 1:
-            for SCV in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SCV]:
-                if not Bot.is_building(self, SCV) and SCV.is_alive and SCV in Data.AGENT_WORKER['MINERS']:
-                    scout = SCV
-                    Data.SCOUT.append(scout)
-                    continue
 
-        if Data.start_base(self) == 'NE':
-            opponent_base_x = Data.SE_BASE[0]
-            opponent_base_y = Data.SE_BASE[1]
-        elif Data.start_base(self) == 'SE':
-            opponent_base_x = Data.NE_BASE[0]
-            opponent_base_y = Data.NE_BASE[1]
-        try:
-            Data.AGENT_WORKER['MINERS'].remove(scout)
-            scout.move(Point2D(opponent_base_x, opponent_base_y))
-            Bot.Debug_info[0] = ['sent scout']
-            for i in range(10):
-                pos_x = int(Data.ENEMYUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.x)
-                pos_y = int(Data.ENEMYUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0].position.y)
 
-                next_tile = self.building_placer.get_build_location_near \
-                    (Point2DI(pos_x, pos_y), UnitType(UNIT_TYPEID.TERRAN_SUPPLYDEPOT, self), 0, 100)
 
-                scout.move(next_tile)
 
-                if scout.tile_position == next_tile:
-                    continue
-
-            scout.move(Point2D(self.start_location_x, self.start_location_y))
-            Data.SCOUT.clear()
-            return
-
-        except Exception as e:
-            pass
-
-def upgrade_orbital_command(self):
-        """Upgrades bases to orbital commands"""
-
-        if not Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS][0].is_completed \
-                or UNIT_TYPEID.TERRAN_COMMANDCENTER not in Data.AGENTUNITS:
-            return False
-
-        for base in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]:
-            if UNIT_TYPEID.TERRAN_ORBITALCOMMAND not in Data.AGENTUNITS and not base.is_training:
-
-                if self.minerals > 150 and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) > 2:
-                    base.ability(ABILITY_ID.MORPH_ORBITALCOMMAND)
-
-def make_factory(self):
-        """Dun do shit"""
-        pass
 
 def make_wall(self):
 

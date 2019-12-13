@@ -55,7 +55,7 @@ class MyAgent(IDABot):
             Bot.send_scout(self)
             Bot.upgrade_orbital_command(self)
             Bot.lower_supply(self)
-
+            Bot.make_marauders(self)
             Bot.unit_attack_handler(self)
 
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
@@ -156,13 +156,13 @@ class MyAgent(IDABot):
 
 
 
-        performance =  0 #/ (time.time() - start)
+        performance = 60 / (time.time() - start)
         Bot.session_info(self, runtime, performance)  # GRAPHICS
 
 
 def main():
 
-    coordinator = Coordinator(r'D:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'E:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

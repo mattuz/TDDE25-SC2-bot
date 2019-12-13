@@ -500,16 +500,18 @@ class Bot(MyAgent):
     def unit_attack_handler(self):
         """Denna ska lägga in units i AGENT_COMBATUNITS så att vi kan attackera m.h.a den."""
         if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
-            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) > 16:
-                for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE][16:]:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) >= 12:
+                for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]:
                     if 'MARINE' not in Data.AGENT_COMBATUNITS['OFFENCE']:
                         Data.AGENT_COMBATUNITS['OFFENCE'].update({'MARINE': []})
                     elif marine not in Data.AGENT_COMBATUNITS['OFFENCE']['MARINE']:
                         Data.AGENT_COMBATUNITS['OFFENCE']['MARINE'].append(marine)
+                        if marine in Data.AGENT_COMBATUNITS['DEFENCE']:
+                            Data.AGENT_COMBATUNITS['DEFENCE']['RAMP'].remove(marine)
 
         elif UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS:
-            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) > 4:
-                for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK][4:]:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) >= 4:
+                for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]:
                     if 'SIEGE' not in Data.AGENT_COMBATUNITS['OFFENCE']:
                         Data.AGENT_COMBATUNITS['OFFENCE'].update({'SIEGE': []})
                     elif siegetank not in Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE']:
@@ -517,12 +519,12 @@ class Bot(MyAgent):
 
         elif UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS and \
                 len(Data.AGENT_COMBATUNITS['OFFENCE']['MARINE']) + len(
-            Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE']) >= 24:
+            Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE']) >= 16:
 
             if 'ATTACKERS' not in Data.AGENT_COMBATUNITS:
                 Data.AGENT_COMBATUNITS.update({'ATTACKERS': []})
 
-            elif Data.start_base(self) == 'NE':
+            if Data.start_base(self) == 'NE':
                 opponent_base_x = 125.5
                 opponent_base_y = 30.5
             else:
@@ -1316,6 +1318,15 @@ class Bot(MyAgent):
                 and Data.AGENTSTATE['STATE'] == 0:
             if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) > 2:
                 Bot.state_setter('STATE', 1)
+
+    def ready_attack(self):
+        if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) >= 12 and \
+                len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) >= 4:
+
+            Bot.state_setter(self, 'PURPOSE', 'OFFENCE')
+        else:
+            bot.state_setter(self, 'PURPOSE, DEFENCE')
+
 
     def enemy_attacking(self) -> None:
         """Returns true if opponent is attacking a base"""

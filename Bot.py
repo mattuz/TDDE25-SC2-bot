@@ -83,7 +83,8 @@ class Bot(MyAgent):
 
         if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) > 2\
                 and UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS and \
-                len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) < 3:
+                len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) < 3\
+                and UNIT_TYPEID.TERRAN_FACTORY in Data.AGENTUNITS:
             TERRAN_BARRACKS = UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)
             base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
 
@@ -177,7 +178,7 @@ class Bot(MyAgent):
             return False
 
         with suppress(Exception):
-            if Bot.econ_check(self, TERRAN_BUNKER) and len(Bot.build_queue(self)) < 2:
+            if Bot.econ_check(self, TERRAN_BUNKER) and len(Bot.build_queue(self)) < 1:
                 if Data.start_base(self) == 'NE':
                     x = 45
                     y = 102
@@ -355,7 +356,7 @@ class Bot(MyAgent):
         if UNIT_TYPEID.TERRAN_COMMANDCENTER in Data.AGENTUNITS and \
                 len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) >=2:
             if Bot.econ_check(self, TERRAN_SIEGETANK) and \
-                 len(Data.BASE_HANDLER[Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][-1].id]['WORKERS']) == 16:
+                 UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
                 for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
                     if not factory.is_training and Bot.has_addon(self, factory, TECHLAB):
                         if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) < 8:
@@ -370,7 +371,8 @@ class Bot(MyAgent):
         if UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]) > 17:
             return False
 
-        if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_BARRACKSTECHLAB in Data.AGENTUNITS:
+        if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_BARRACKSTECHLAB in Data.AGENTUNITS and \
+                UNIT_TYPEID.TERRAN_FACTORY in Data.AGENTUNITS:
             for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
                 if Bot.econ_check(self, TERRAN_MARAUDER) and Bot.has_addon(self, barrack, TECHLAB):
                     barrack.train(TERRAN_MARAUDER)
@@ -515,45 +517,54 @@ class Bot(MyAgent):
                     elif siegetank not in Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE']:
                         Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE'].append(siegetank)
 
-        elif UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS and \
-                len(Data.AGENT_COMBATUNITS['OFFENCE']['MARINE']) + len(
-            Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE']) >= 24:
+        elif UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]) > 4:
+                for marauder in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER][4:]:
+                    if 'MARAUDER' not in Data.AGENT_COMBATUNITS['OFFENCE']:
+                        Data.AGENT_COMBATUNITS['OFFENCE'].update({'MARAUDER': []})
+                    elif marauder not in Data.AGENT_COMBATUNITS['OFFENCE']['MARAUDER']:
+                        Data.AGENT_COMBATUNITS['OFFENCE']['MARAUDER'].append(marauder)
 
-            if 'ATTACKERS' not in Data.AGENT_COMBATUNITS:
-                Data.AGENT_COMBATUNITS.update({'ATTACKERS': []})
+        with suppress(Exception):
+            if UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS and \
+                    'MARINE' in Data.AGENT_COMBATUNITS['OFFENCE'] and len(Data.AGENT_COMBATUNITS['OFFENCE']['MARINE']) >= 24:
 
-            elif Data.start_base(self) == 'NE':
-                opponent_base_x = 125.5
-                opponent_base_y = 30.5
-            else:
-                opponent_base_x = 26.5
-                opponent_base_y = 137.5
+                if 'ATTACKERS' not in Data.AGENT_COMBATUNITS:
+                    Data.AGENT_COMBATUNITS.update({'ATTACKERS': []})
 
-            for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]:
-                if marine.is_alive and marine.is_idle and marine not in Data.AGENT_COMBATUNITS[
-                    'ATTACKERS']:
-                    Data.AGENT_COMBATUNITS['ATTACKERS'].append(marine)
-                if not marine.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
-                    Data.AGENT_COMBATUNITS['ATTACKERS'].remove(marine)
+                for marine in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]:
+                    if marine.is_alive and marine.is_idle and marine not in Data.AGENT_COMBATUNITS[
+                        'ATTACKERS']:
+                        Data.AGENT_COMBATUNITS['ATTACKERS'].append(marine)
+                    if not marine.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
+                        Data.AGENT_COMBATUNITS['ATTACKERS'].remove(marine)
 
-            for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]:
-                if siegetank.is_alive and siegetank.is_idle and siegetank not in \
-                        Data.AGENT_COMBATUNITS['ATTACKERS']:
-                    Data.AGENT_COMBATUNITS['ATTACKERS'].append(siegetank)
-                if not siegetank.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
-                    Data.AGENT_COMBATUNITS['ATTACKERS'].remove(siegetank)
+                for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]:
+                    if siegetank.is_alive and siegetank.is_idle and siegetank not in \
+                            Data.AGENT_COMBATUNITS['ATTACKERS']:
+                        siegetank.ability(ABILITY_ID.MORPH_TANKMODE)
 
-            for marauder in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]:
-                if marauder.is_alive and marauder.is_idle and marauder not in \
-                        Data.AGENT_COMBATUNITS['ATTACKERS']:
-                    Data.AGENT_COMBATUNITS['ATTACKERS'].append(marauder)
-                if not marauder.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
-                    Data.AGENT_COMBATUNITS['ATTACKERS'].remove(marauder)
+                        Data.AGENT_COMBATUNITS['ATTACKERS'].append(siegetank)
+                    if not siegetank.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
+                        Data.AGENT_COMBATUNITS['ATTACKERS'].remove(siegetank)
+
+                for marauder in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]:
+                    if marauder.is_alive and marauder.is_idle and marauder not in \
+                            Data.AGENT_COMBATUNITS['ATTACKERS']:
+                        Data.AGENT_COMBATUNITS['ATTACKERS'].append(marauder)
+                    if not marauder.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
+                        Data.AGENT_COMBATUNITS['ATTACKERS'].remove(marauder)
 
 
-            for attacker in Data.AGENT_COMBATUNITS['ATTACKERS']:
-                if len(Data.AGENT_COMBATUNITS['ATTACKERS']) > 25:
-                    attacker.attack_move(Point2D(opponent_base_x, opponent_base_y))
+                for attacker in Data.AGENT_COMBATUNITS['ATTACKERS']:
+                    if len(Data.AGENT_COMBATUNITS['ATTACKERS']) > 25:
+                        if Data.start_base(self) == 'NE':
+                            opponent_base_x = 125.5
+                            opponent_base_y = 30.5
+                        else:
+                            opponent_base_x = 26.5
+                            opponent_base_y = 137.5
+                        attacker.attack_move(Point2D(opponent_base_x, opponent_base_y))
 
 
 

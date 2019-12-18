@@ -338,7 +338,7 @@ class Bot(MyAgent):
         """Creates siege tanks"""
 
         if UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS:
-            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) > 3:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) > 6:
                 return False
 
         if UNIT_TYPEID.TERRAN_FACTORYTECHLAB not in Data.AGENTUNITS:
@@ -357,7 +357,7 @@ class Bot(MyAgent):
                 len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) >=2:
             if Bot.econ_check(self, TERRAN_SIEGETANK) and \
                  UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
-                for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
+                for factory in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_FACTORY]:
                     if not factory.is_training and Bot.has_addon(self, factory, TECHLAB):
                         if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) < 8:
                             factory.train(TERRAN_SIEGETANK)
@@ -518,12 +518,11 @@ class Bot(MyAgent):
                         Data.AGENT_COMBATUNITS['OFFENCE']['SIEGE'].append(siegetank)
 
         elif UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
-            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]) > 4:
-                for marauder in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER][4:]:
-                    if 'MARAUDER' not in Data.AGENT_COMBATUNITS['OFFENCE']:
-                        Data.AGENT_COMBATUNITS['OFFENCE'].update({'MARAUDER': []})
-                    elif marauder not in Data.AGENT_COMBATUNITS['OFFENCE']['MARAUDER']:
-                        Data.AGENT_COMBATUNITS['OFFENCE']['MARAUDER'].append(marauder)
+            for marauder in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]:
+                if 'MARAUDER' not in Data.AGENT_COMBATUNITS['OFFENCE']:
+                    Data.AGENT_COMBATUNITS['OFFENCE'].update({'MARAUDER': []})
+                elif marauder not in Data.AGENT_COMBATUNITS['OFFENCE']['MARAUDER']:
+                    Data.AGENT_COMBATUNITS['OFFENCE']['MARAUDER'].append(marauder)
 
         with suppress(Exception):
             if UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS and \
@@ -542,22 +541,23 @@ class Bot(MyAgent):
                 for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]:
                     if siegetank.is_alive and siegetank.is_idle and siegetank not in \
                             Data.AGENT_COMBATUNITS['ATTACKERS']:
-                        siegetank.ability(ABILITY_ID.MORPH_TANKMODE)
-
+                        siegetank.ability(ABILITY_ID.MORPH_UNSIEGE)
                         Data.AGENT_COMBATUNITS['ATTACKERS'].append(siegetank)
-                    if not siegetank.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
+                        Data.AGENT_COMBATUNITS['RAMP'].remove(siegetank)
+                        Data.AGENT_COMBATUNITS['CHOKE'].remove(siegetank)
+                    if not siegetank.is_alive and siegetank in Data.AGENT_COMBATUNITS['ATTACKERS']:
                         Data.AGENT_COMBATUNITS['ATTACKERS'].remove(siegetank)
 
                 for marauder in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]:
                     if marauder.is_alive and marauder.is_idle and marauder not in \
                             Data.AGENT_COMBATUNITS['ATTACKERS']:
                         Data.AGENT_COMBATUNITS['ATTACKERS'].append(marauder)
-                    if not marauder.is_alive and marine in Data.AGENT_COMBATUNITS['ATTACKERS']:
+                    if not marauder.is_alive and marauder in Data.AGENT_COMBATUNITS['ATTACKERS']:
                         Data.AGENT_COMBATUNITS['ATTACKERS'].remove(marauder)
 
 
                 for attacker in Data.AGENT_COMBATUNITS['ATTACKERS']:
-                    if len(Data.AGENT_COMBATUNITS['ATTACKERS']) > 25:
+                    if len(Data.AGENT_COMBATUNITS['ATTACKERS']) > 35:
                         if Data.start_base(self) == 'NE':
                             opponent_base_x = 125.5
                             opponent_base_y = 30.5

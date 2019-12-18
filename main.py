@@ -33,8 +33,14 @@ class MyAgent(IDABot):
 
         Bot.unit_debug(self)  # DEBUG
         Bot.neutral_debug(self)  # DEBUG
+        Bot.construction_draw(self)
+        Bot.enemy_debug(self)  # DEBUG
+        Bot.unit_task(self)
+        Bot.state_listener(self)  # STATE HANDLER
+        Bot.base_listener(self)
 
         if UNIT_TYPEID.NEUTRAL_MINERALFIELD and UNIT_TYPEID.NEUTRAL_MINERALFIELD750 in Data.NEUTRALUNITS:
+            Bot.unit_death_handler(self)
             Bot.base_handler(self)
             Bot.mineral_worker_handler(self)
             Bot.gas_worker_handler(self)
@@ -46,21 +52,26 @@ class MyAgent(IDABot):
             Bot.make_refinery(self)
             Bot.make_barracks(self)
             Bot.make_workers(self)
-           # Bot.move_marines_to_ramp(self)
-            #Bot.move_siege_to_defend(self)
-            #Bot.unit_attack_handler(self)
+            Bot.move_marines_to_ramp(self)
+            Bot.move_siege_to_defend(self)
             Bot.make_factory(self)
             Bot.factory_upgrade(self)
             Bot.make_siege_tanks(self)
             Bot.map_info(self)
             Bot.send_scout(self)
             Bot.upgrade_orbital_command(self)
+            if UNIT_TYPEID.TERRAN_ORBITALCOMMAND in Data.AGENTUNITS:
+                Bot.send_mule(self)
             Bot.lower_supply(self)
             Bot.make_marauders(self)
-
+            Bot.unit_attack_handler(self)
 
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
                 Bot.make_expansion(self)
+                Bot.make_starport(self)
+                Bot.starport_upgrade(self)
+                Bot.make_marauder(self)
+                Bot.combat_handler(self)
                 #Bot.stray_worker_handling(self)
 
 
@@ -77,8 +88,7 @@ class MyAgent(IDABot):
 
         #Bot.make_barracks(self)
 
-        Bot.state_listener(self)  # STATE HANDLER
-        Bot.base_listener(self)  # STATE HANDLER
+ # STATE HANDLER
         #if Bot.enemy_attacking(self):
             #Bot.state_setter('PURPOSE', 'DEFENCE')
 
@@ -119,16 +129,13 @@ class MyAgent(IDABot):
         #         if UNIT_TYPEID.TERRAN_STARPORT in Data.AGENTSTATE:
         #             pass
         #
-        if Data.AGENTSTATE['PURPOSE'] == 'OFFENCE':
-            if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
-                Bot.unit_attack_handler(self)
+        #     if Data.AGENTSTATE['PURPOSE'] == 'OFFENCE':
+        #         if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
         #             Bot.marine_charge(self)  # BOT ACTION
         #             Bot.marauder_charge(self)
         #
-        if Data.AGENTSTATE['PURPOSE'] == 'DEFENCE':
-            Bot.move_marines_to_ramp(self)
-            Bot.move_siege_to_defend(self)
-                 #Bot.defend_base(self)
+        #     if Data.AGENTSTATE['PURPOSE'] == 'DEFENCE':
+        #         Bot.defend_base(self)
 
 
 
@@ -160,13 +167,13 @@ class MyAgent(IDABot):
 
 
 
-        performance = 0 #60 / (time.time() - start)
+        performance = 60 / (time.time() - start)
         Bot.session_info(self, runtime, performance)  # GRAPHICS
 
 
 def main():
 
-    coordinator = Coordinator(r'D:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'E:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

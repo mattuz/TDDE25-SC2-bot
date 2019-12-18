@@ -5,6 +5,7 @@ from main import *
 from Simplified import *
 import math
 from contextlib import *
+from combat import *
 
 
 # from Simplified import *
@@ -55,7 +56,7 @@ class Bot(MyAgent):
                             if refinery.id not in gas:
                                 Data.BASE_HANDLER[base]['GAS'].update({refinery.id: []})
                             elif refinery.position.x != geyser.position.x and refinery.position.y != geyser.position.y \
-                                    and len(Bot.build_queue(self)) < 1:
+                                    and len(Bot.build_queue(self)) < 3:
                                 builder.build_target(TERRAN_REFINERY, geyser)
                                 return
                     else:
@@ -69,7 +70,6 @@ class Bot(MyAgent):
         if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_BARRACKS not in Data.AGENTUNITS:
             TERRAN_BARRACKS = UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)
             base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
-
             Bot.build(self, TERRAN_BARRACKS, base, 2)
 
 
@@ -81,15 +81,9 @@ class Bot(MyAgent):
             Bot.build(self, TERRAN_BARRACKS, base, 2)
             return
 
-        if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) > 2\
-                and UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS and \
-                len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) < 3:
-            TERRAN_BARRACKS = UnitType(UNIT_TYPEID.TERRAN_BARRACKS, self)
-            base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
-
-            Bot.build(self, TERRAN_BARRACKS, base, 2)
-            return
-
+        """
+        //////////REMOTE
+        """
 
     def make_supply_depot(self):
         """Creates supply depots"""
@@ -109,15 +103,35 @@ class Bot(MyAgent):
 
     def make_factory(self):
 
-        if len(Data.BUILDER) > 1:
+        if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) < 2:
             return False
 
-        if UNIT_TYPEID.TERRAN_BUNKER in Data.AGENTUNITS and \
+        if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS and \
                 UNIT_TYPEID.TERRAN_FACTORY not in Data.AGENTUNITS and len(Bot.build_queue(self)) < 2:
-            # and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) > 7:
             TERRAN_FACTORY = UnitType(UNIT_TYPEID.TERRAN_FACTORY, self)
             base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
-            Bot.build(self, TERRAN_FACTORY, base, 2)
+            Bot.build(self, TERRAN_FACTORY, base, 0)
+        elif UNIT_TYPEID.TERRAN_FACTORY in Data.AGENTUNITS:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_FACTORY]) < 2:
+                TERRAN_FACTORY = UnitType(UNIT_TYPEID.TERRAN_FACTORY, self)
+                base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
+                Bot.build(self, TERRAN_FACTORY, base, 0)
+
+    def make_starport(self):
+
+        if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) < 2:
+            return False
+
+        if UNIT_TYPEID.TERRAN_FACTORY in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_STARPORT not in Data.AGENTUNITS \
+                and len(Bot.build_queue(self)) < 2:
+            TERRAN_STARPORT = UnitType(UNIT_TYPEID.TERRAN_STARPORT, self)
+            base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
+            Bot.build(self, TERRAN_STARPORT, base, 0)
+        elif UNIT_TYPEID.TERRAN_STARPORT in Data.AGENTUNITS:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_STARPORT]) < 2:
+                TERRAN_STARPORT = UnitType(UNIT_TYPEID.TERRAN_STARPORT, self)
+                base = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][0]
+                Bot.build(self, TERRAN_STARPORT, base, 0)
 
     def make_expansion(self):
         """Expands the base when requirements are met"""
@@ -140,7 +154,7 @@ class Bot(MyAgent):
             TERRAN_COMMANDCENTER = UnitType(UNIT_TYPEID.TERRAN_COMMANDCENTER, self)
             builder = Bot.get_worker(self)
             with suppress(Exception):
-                if Bot.econ_check(self, TERRAN_COMMANDCENTER) and len(Bot.build_queue(self)) < 1:
+                if Bot.econ_check(self, TERRAN_COMMANDCENTER) and len(Bot.build_queue(self)) < 3:
                     if Data.start_base(self) == 'NE':
                         x = 25
                         y = 111
@@ -148,6 +162,10 @@ class Bot(MyAgent):
                         x = 126
                         y = 56
                     builder.build(TERRAN_COMMANDCENTER, Point2DI(x, y))
+
+        """
+        ///REMOTE
+        """
 
         if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) > 1 and \
                 len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]) and UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
@@ -186,19 +204,24 @@ class Bot(MyAgent):
                     y = 67
                 builder.build(TERRAN_BUNKER, Point2DI(x, y))
 
-        with suppress(Exception):
-            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER]) >= 1:
-                marines = Data.AGENT_COMBATUNITS['DEFENCE']['CHOKE']
-                for marine in marines:
-                    if Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position, marine.position, 4):
-                        marines_in_bunker.append(marine)
-                    elif marine in marines_in_bunker \
-                            and not Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position,
-                                             marine.position, 4):
-                        marines_in_bunker.remove(marine)
-                    elif not Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position, marine.position, 4):
-                        marine.right_click(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0])
-                    continue
+        """
+        ///FUNKAR DÅLIG, KOLLA IGENOM
+        """
+
+
+        # with suppress(Exception):
+        #     if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER]) >= 1:
+        #         marines = Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE][8:12]
+        #         for marine in marines:
+        #             if Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position, marine.position, 4):
+        #                 marines_in_bunker.append(marine)
+        #             elif marine in marines_in_bunker \
+        #                     and not Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position,
+        #                                      marine.position, 4):
+        #                 marines_in_bunker.remove(marine)
+        #             elif not Bot.near(self, Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0].position, marine.position, 4):
+        #                 marine.right_click(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BUNKER][0])
+        #             continue
 
     # def make_ghostacademy(self):
     #
@@ -244,18 +267,39 @@ class Bot(MyAgent):
         REACTOR = UnitType(UNIT_TYPEID.TERRAN_FACTORYREACTOR, self)
         TECHLAB = UnitType(UNIT_TYPEID.TERRAN_FACTORYTECHLAB, self)
 
-        if UNIT_TYPEID.TERRAN_FACTORYTECHLAB in Data.AGENTUNITS and Bot.econ_check(self, TECHLAB):
-            for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_FACTORY]:
-                if barrack.build_percentage == 1 and UNIT_TYPEID.TERRAN_FACTORYREACTOR not in Data.AGENTUNITS \
-                        and not barrack.is_training:
-                    barrack.train(REACTOR)
+        # if UNIT_TYPEID.TERRAN_FACTORYTECHLAB in Data.AGENTUNITS and Bot.econ_check(self, TECHLAB):
+        #     for factory in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_FACTORY]:
+        #         if factory.build_percentage == 1 and UNIT_TYPEID.TERRAN_FACTORYREACTOR not in Data.AGENTUNITS \
+        #                 and not factory.is_training:
+        #             factory.train(REACTOR)
+        #         elif TECHLAB in Data.AGENTUNITS:
+        #             pass
+
+        if Bot.econ_check(self, TECHLAB):
+            for factory in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_FACTORY]:
+                if factory.build_percentage == 1 and not factory.is_training and not Bot.has_addon(self, factory, TECHLAB):
+                    factory.train(TECHLAB)
+
+    def starport_upgrade(self):
+
+        if UNIT_TYPEID.TERRAN_STARPORT not in Data.AGENTUNITS:
+            return False
+
+        REACTOR = UnitType(UNIT_TYPEID.TERRAN_STARPORTREACTOR, self)
+        TECHLAB = UnitType(UNIT_TYPEID.TERRAN_STARPORTTECHLAB, self)
+
+        if UNIT_TYPEID.TERRAN_STARPORTREACTOR in Data.AGENTUNITS and Bot.econ_check(self, TECHLAB):
+            for factory in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_STARPORT]:
+                if factory.build_percentage == 1 and UNIT_TYPEID.TERRAN_STARPORTTECHLAB not in Data.AGENTUNITS \
+                        and not factory.is_training:
+                    factory.train(TECHLAB)
                 elif TECHLAB in Data.AGENTUNITS:
                     pass
 
-        if Bot.econ_check(self, TECHLAB):
-            for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_FACTORY]:
-                if barrack.build_percentage == 1 and not barrack.is_training:
-                    barrack.train(TECHLAB)
+        if Bot.econ_check(self, REACTOR):
+            for starport in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_STARPORT]:
+                if starport.build_percentage == 1 and not starport.is_training:
+                    starport.train(REACTOR)
 
     def upgrade_orbital_command(self):
         """Upgrades bases to orbital commands"""
@@ -264,7 +308,7 @@ class Bot(MyAgent):
             for base in Data.BASE_HANDLER:
                 base = Data.BASE_HANDLER[base]['BASE']
 
-                if base.unit_type.unit_typeid != UNIT_TYPEID.TERRAN_COMMANDCENTER:
+                if base.unit_type.unit_typeid != UNIT_TYPEID.TERRAN_ORBITALCOMMAND:
                     if self.minerals > 300:
                         base.ability(ABILITY_ID.MORPH_ORBITALCOMMAND)
 
@@ -302,36 +346,19 @@ class Bot(MyAgent):
         TERRAN_MARINE = UnitType(UNIT_TYPEID.TERRAN_MARINE, self)
         REACTOR = UnitType(UNIT_TYPEID.TERRAN_BARRACKSREACTOR, self)
 
-        if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
-            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) > 7:
-                for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
-                    if UNIT_TYPEID.TERRAN_COMMANDCENTER in Data.AGENTUNITS and \
-                            len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) < 16 and \
-                            len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) > 1:
-                        barrack.train(TERRAN_MARINE)
-                        barrack.train(TERRAN_MARINE)
-                    else:
-                        pass
-
         if UNIT_TYPEID.TERRAN_BARRACKSREACTOR not in Data.AGENTUNITS:
             return False
 
+        if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) >= 25:
+                return False
 
-        elif Bot.econ_check(self, TERRAN_MARINE) and self.minerals > 200:
+        if Bot.econ_check(self, TERRAN_MARINE) and self.minerals > 200:
             for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
                 if barrack.build_percentage == 1 and UNIT_TYPEID.TERRAN_BARRACKSREACTOR in Data.AGENTUNITS \
                         and not barrack.is_training and Bot.has_addon(self, barrack, REACTOR):
                     barrack.train(TERRAN_MARINE)
                     barrack.train(TERRAN_MARINE)
-
-        #Testar att göra fler marines till vår attack.
-        elif UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
-            for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
-                if Bot.econ_check(self, TERRAN_MARINE) and Bot.has_addon(self, barrack, REACTOR) \
-                        and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE]) < 37:
-                    barrack.train(TERRAN_MARINE)
-                    barrack.train(TERRAN_MARINE)
-
 
     def make_siege_tanks(self):
         """Creates siege tanks"""
@@ -352,33 +379,72 @@ class Bot(MyAgent):
                         and not factory.is_training and Bot.has_addon(self, factory, TECHLAB):
                     factory.train(TERRAN_SIEGETANK)
 
-        if UNIT_TYPEID.TERRAN_COMMANDCENTER in Data.AGENTUNITS and \
-                len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) >=2:
-            if Bot.econ_check(self, TERRAN_SIEGETANK) and \
-                 len(Data.BASE_HANDLER[Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][-1].id]['WORKERS']) == 16:
-                for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
-                    if not factory.is_training and Bot.has_addon(self, factory, TECHLAB):
-                        if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) < 8:
-                            factory.train(TERRAN_SIEGETANK)
-                        else:
-                            return False
+        # """
+        # KOLLA *******************
+        # """
+        #
+        # if UNIT_TYPEID.TERRAN_COMMANDCENTER in Data.AGENTUNITS and \
+        #         len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER]) >=2:
+        #     if Bot.econ_check(self, TERRAN_SIEGETANK) and \
+        #          len(Data.BASE_HANDLER[Data.AGENTUNITS[UNIT_TYPEID.TERRAN_COMMANDCENTER][-1].id]['WORKERS']) == 16:
+        #         for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
+        #             if not factory.is_training and Bot.has_addon(self, factory, TECHLAB):
+        #                 if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) < 8:
+        #                     factory.train(TERRAN_SIEGETANK)
+        #                 else:
+        #                     return False
 
-    def make_marauders(self):
+    def make_marauder(self):
+        """Makes Marauders"""
+
+        if UNIT_TYPEID.TERRAN_BARRACKSTECHLAB not in Data.AGENTUNITS:
+            return False
+
+        if UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
+            if len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]) >= 10:
+                return False
+
         TERRAN_MARAUDER = UnitType(UNIT_TYPEID.TERRAN_MARAUDER, self)
         TECHLAB = UnitType(UNIT_TYPEID.TERRAN_BARRACKSTECHLAB, self)
 
-        if UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER]) > 17:
+        if Bot.econ_check(self, TERRAN_MARAUDER) and self.minerals > 200:
+            for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
+                if barrack.build_percentage == 1 and UNIT_TYPEID.TERRAN_BARRACKSTECHLAB in Data.AGENTUNITS \
+                        and not barrack.is_training and Bot.has_addon(self, barrack, TECHLAB):
+                    barrack.train(TERRAN_MARAUDER)
+
+    def make_medivac(self):
+
+        if UNIT_TYPEID.TERRAN_STARPORT not in Data.AGENTUNITS:
             return False
 
-        if UNIT_TYPEID.TERRAN_BARRACKS in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_BARRACKSTECHLAB in Data.AGENTUNITS:
-            for barrack in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_BARRACKS]:
-                if Bot.econ_check(self, TERRAN_MARAUDER) and Bot.has_addon(self, barrack, TECHLAB):
-                    barrack.train(TERRAN_MARAUDER)
+        bio_units = 0
+
+        if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
+            bio_units += len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARINE])
+        if UNIT_TYPEID.TERRAN_MARAUDER in Data.AGENTUNITS:
+            bio_units += len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MARAUDER])
+
+        if UNIT_TYPEID.TERRAN_MEDIVAC in Data.AGENTUNITS:
+            if len(bio_units)/6 < len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MEDIVAC]):
+                for starport in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_STARPORT]:
+                    TERRAN_MEDIVAC = UnitType(UNIT_TYPEID.TERRAN_MEDIVAC, self)
+                    REACTOR = UnitType(UNIT_TYPEID.TERRAN_STARPORTREACTOR, self)
+                    if Bot.econ_check(self, TERRAN_MEDIVAC) and not starport.is_training \
+                            and Bot.has_addon(self, starport, REACTOR):
+                        starport.train(TERRAN_MEDIVAC)
+        else:
+            for starport in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_STARPORT]:
+                TERRAN_MEDIVAC = UnitType(UNIT_TYPEID.TERRAN_MEDIVAC, self)
+                REACTOR = UnitType(UNIT_TYPEID.TERRAN_STARPORTREACTOR, self)
+                if Bot.econ_check(self, TERRAN_MEDIVAC) and not starport.is_training \
+                        and Bot.has_addon(self, starport, REACTOR):
+                    starport.train(TERRAN_MEDIVAC)
 
 
     """---  Control Units  ---"""
 
-    def move_marines_to_ramp(self):
+    def move_marines_to_defend(self):
         """Moves marines to defence-positions"""
 
         if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
@@ -434,7 +500,7 @@ class Bot(MyAgent):
                 x = 107
                 y = 67
 
-            if len(army['CHOKE']) >= 4 and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) >= 2:
+            with suppress(Exception):
                 for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK][:2]:  # [2:4]:
                     if not Bot.near(self, siegetank.position, Point2D(x, y), 5):
                         siegetank.move(Point2D(x, y))
@@ -446,9 +512,7 @@ class Bot(MyAgent):
                         siegetank.ability(ABILITY_ID.MORPH_SIEGEMODE)
                     else:
                         pass
-
-            if len(army['RAMP']) >= 8 and UNIT_TYPEID.TERRAN_SIEGETANK in Data.AGENTUNITS \
-                    and len(Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK]) >= 2:
+            with suppress(Exception):
                 for siegetank in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_SIEGETANK][2:4]:  # [0:2]:
                     if not Bot.near(self, siegetank.position, Point2D(ramp[0], ramp[1]), 5):
                         siegetank.move(Point2D(ramp[0], ramp[1]))
@@ -469,7 +533,7 @@ class Bot(MyAgent):
                 if not Bot.is_building(self, SCV) and SCV.is_alive and SCV in Bot.all_miners(self):
                     scout = SCV
                     Data.SCOUT.append(scout)
-                    continue
+                    break
 
             if Data.start_base(self) == 'NE':
                 opponent_base_x = Data.SE_BASE[0]
@@ -497,6 +561,24 @@ class Bot(MyAgent):
             Data.SCOUT.clear()
             return
 
+    def medivac_drop(self):
+
+        if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS and UNIT_TYPEID.TERRAN_MEDIVAC in Data.AGENTUNITS:
+
+            for medivacs in Data.AGENTUNITS[UNIT_TYPEID.TERRAN_MEDIVAC]:
+                pass
+
+    def send_mule(self):
+
+        for base in Data.BASE_HANDLER:
+            if Data.BASE_HANDLER[base]['BASE'].energy > 50 and self.minerals < 700:
+                mineral = Data.BASE_HANDLER[base]['MINERALS'][0]
+                Data.BASE_HANDLER[base]['BASE'].ability(ABILITY_ID.EFFECT_CALLDOWNMULE, mineral)
+                continue
+
+    """OKLAR KOLLA 
+    
+    ****************"""
     def unit_attack_handler(self):
         """Denna ska lägga in units i AGENT_COMBATUNITS så att vi kan attackera m.h.a den."""
         if UNIT_TYPEID.TERRAN_MARINE in Data.AGENTUNITS:
@@ -557,10 +639,6 @@ class Bot(MyAgent):
                 if len(Data.AGENT_COMBATUNITS['ATTACKERS']) > 25:
                     attacker.attack_move(Point2D(opponent_base_x, opponent_base_y))
 
-
-
-
-
     def lower_supply(self) -> None:
         """Lowers every supplydepot"""
 
@@ -572,6 +650,40 @@ class Bot(MyAgent):
                     continue
 
     """---  Combat Specific  ---"""
+
+    def combat_handler(self):
+
+        if len(combat.select_all(self)) > 15:
+            for unit in combat.select_all(self):
+                if Data.start_base(self) == 'NE':
+                    enemy = Point2D(Data.SE_BASE[0], Data.SE_BASE[1])
+                else:
+                    enemy = Point2D(Data.NE_BASE[0], Data.NE_BASE[1])
+                unit.attack_move(enemy)
+
+        for unit in combat.select_all(self):
+            if not unit.has_target:
+                continue
+            if unit.has_target:
+                data = combat.unit_data(self, unit)
+                enemy = unit.target
+                if enemy.player == 0:
+                    continue
+                enemy_data = combat.unit_data(self, unit.target)
+                if data != None:
+                    if 'AIR' not in data['TARGET'] and enemy.is_flying:
+                        for enemy in combat.get_enemy_near(self, unit, unit.unit_type.attack_range):
+                            if not enemy.is_flying:
+                                unit.attack_unit(enemy)
+                                continue
+                if enemy.has_target:
+                    if enemy.target == unit and unit.unit_type.attack_range > enemy.unit_type.attack_range:
+                        if Bot.distance_to(self, unit, unit.target) < unit.unit_type.attack_range:
+                            unit.attack_move(Point2D(unit.position.x - 3, unit.position.y - 3))
+                            unit.attack_unit(enemy)
+                    for enemy in combat.get_enemy_near(self, unit, unit.unit_type.attack_range):
+                        if enemy.hit_points < unit.hit_points:
+                            unit.attack_unit(enemy)
 
     def defend_base(self):
         """Defends Base (poorly) if attacked"""
@@ -836,21 +948,6 @@ class Bot(MyAgent):
             #      if len(Data.BASE_HANDLER[base]['WORKERS']) < 22:
             #          for mineral in mineral_deposits:
             #              worker.right_click(minerals)
-            elif worker.is_idle: #not in Bot.all_workers(self):
-                if Data.start_base(self) == 'NE':
-                    x = 25
-                    y = 111
-                    worker.move(Point2D(x - 3, y + 2))
-                else:
-                    x = 126
-                    y = 56
-                    worker.move(Point2D(x + 3, y - 2))
-
-
-               # for base in Data.BASE_HANDLER:
-               #      if len(Data.BASE_HANDLER[base]['WORKERS']) < 22:
-               #          for mineral in mineral_deposits:
-               #              worker.right_click(minerals)
 
     def base_handler(self) -> None:
         """Handles data in Data.BASE_HANDLER"""
@@ -934,11 +1031,6 @@ class Bot(MyAgent):
                 if not unit.is_alive:
                     Data.NEUTRALUNITS[types].remove(unit)
 
-        for types in Data.AGENTUNITS:
-            if types in Data.AGENT_COMBATUNITS:
-                for unit in Data.AGENT_COMBATUNITS[types]:
-                    if not unit.is_alive:
-                        Data.AGENT_COMBATUNITS[types].remove(unit)
 
     def find_expired_minerals(self):
 
@@ -1295,6 +1387,7 @@ class Bot(MyAgent):
 
         return all_gas_workers
 
+
     """///////////////////////////////////////////////////////////////////////////////////////////////////////////////
                                                    ~STATE HANDLERS~
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////"""
@@ -1478,19 +1571,7 @@ class Bot(MyAgent):
         """Draws info about current session on screen"""
 
         mapdraw = self.map_tools.draw_text_screen
-        APEX = 0.014
-
         AGENTPRINT = 0.02
-
-        # def buildq():
-        #     buildings = []
-        #     doubles = 0
-        #     for builder in Bot.build_queue():
-        #         buildings.append(Bot.is_building_name(self, builder))
-        #     for e in buildings:
-        #         c = str(buildings.count(e) +':'+ e)
-        #         mapdraw(0.02, AGENTPRINT, "BUILD QUEUE: " + str(Bot.build_queue(self)), Color(100, 200, 255))
-        #         AGENTPRINT += 0.01
 
         mapdraw(0.02, 0.007, "----AGENTDATA----", Color(255, 255, 255))
         mapdraw(0.02, AGENTPRINT, "EXPANSIONS: " + str(len(Data.BASE_HANDLER)), Color(255, 255, 255))
@@ -1532,6 +1613,20 @@ class Bot(MyAgent):
         mapdraw(0.02, 0.645, "Runtime " + str(round(runtime, 0)), Color(100, 200, 255))
         mapdraw(0.02, 0.66, "Performance: " + str(int(performance)) \
                 + " Loops / Second on Frame: " + str(self.current_frame), Color(100, 200, 255))
+
+    def construction_draw(self):
+
+        mapdraw = self.map_tools.draw_text
+
+        for a in Data.AGENTUNITS:
+            c = Data.AGENTUNITS[a]
+            c.reverse()
+            for b in c:
+                if b.unit_type.is_building and not b.is_completed:
+                    progress = 255 * b.build_percentage
+                    mapdraw(b.position, str(round(b.build_percentage/0.01, 1)) + '% DONE', Color(int(255 - progress), int(progress), 0))
+
+
 
     """---  Map Tags  ---"""
 

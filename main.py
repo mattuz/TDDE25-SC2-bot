@@ -29,6 +29,7 @@ class MyAgent(IDABot):
         "CO-ROUTINES"
         Bot.unit_debug(self)  # DEBUG
         Bot.neutral_debug(self)  # DEBUG
+        Bot.stray_worker_handling(self)
 
         if UNIT_TYPEID.NEUTRAL_MINERALFIELD and UNIT_TYPEID.NEUTRAL_MINERALFIELD750 in Data.NEUTRALUNITS:
             Bot.base_handler(self)
@@ -160,7 +161,7 @@ class MyAgent(IDABot):
 
 def main():
 
-    coordinator = Coordinator(r'E:\StarCraft II\Versions\Base69232\SC2_x64.exe')
+    coordinator = Coordinator(r'F:\StarCraft II\Versions\Base69232\SC2_x64.exe')
     bot1 = MyAgent()
     # bot2 =
 

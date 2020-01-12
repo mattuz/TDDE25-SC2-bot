@@ -36,9 +36,6 @@ class Data():
     SE_BASE = (125.5, 30.5)
 
 
-
-
-
     def __init__(self):
         pass
 
@@ -97,25 +94,3 @@ class Data():
             WALLPOSITION = [(118.0, 43.0), (115.0, 46.0), (117.5, 46.5)]
 
         return WALLPOSITION[step][0], WALLPOSITION[step][1]
-
-##Kan vi ta bort nedan?
-# class UnitData():
-#
-#     TERRAN_MARINE = {'DPS': 9.8, 'TARGET': ['GROUND', 'AIR'], 'SPEED': 3.15,'RANGE': 5, 'TYPE': 'LIGHT', 'BONUS': 'NONE'}
-#     TERRAN_MARAUDER = {'DPS': 9.3, 'TARGET': ['GROUND'], 'SPEED': 3.15, 'RANGE': 6, 'TYPE': 'ARMORED', 'BONUS': {'ARMORED': 9.3}}
-#     TERRAN_REAPER = {'DPS': 10.1, 'TARGET': ['GROUND'], 'SPEED': 5.25, 'RANGE': 5, 'TYPE': 'LIGHT', 'BONUS': 'NONE'}
-#     TERRAN_GHOST = {'DPS': 9.3, 'TARGET': ['GROUND', 'AIR'], 'SPEED': 3.94, 'RANGE': 6, 'TYPE': 'LIGHT', 'BONUS': {'LIGHT': 9.3}}
-#     TERRAN_SIEGETANK = {'DPS': 13.51, 'TARGET': ['GROUND'], 'SPEED': 3.15, 'RANGE': 7, 'TYPE': 'ARMORED', 'BONUS': {'LIGHT': 13.51}}
-#     TERRAN_SIEGETANKSIEGED = {'DPS': 18.69, 'TARGET': ['GROUND'], 'SPEED': 0, 'RANGE': 12, 'TYPE': 'ARMORED', 'BONUS': {'LIGHT': 14.02}}
-#     TERRAN_HELLION = {'DPS': 4.45, 'TARGET': ['GROUND'], 'SPEED': 5.95, 'RANGE': 5, 'TYPE': 'LIGHT', 'BONUS': {'LIGHT': 3.4}}
-#     TERRAN_WIDOWMINE = None
-#     WIDOWMINEBURROWED = {'DPS': 125, 'TARGET': ['GROUND', 'AIR'], 'SPEED': 3.94, 'RANGE': 5, 'TYPE': 'LIGHT', 'BONUS': {'LIGHT': 160}}
-#     TERRAN_THOR = {'DPS': 65.9, 'TARGET': ['GROUND'], 'SPEED': 2.62, 'RANGE': 7, 'TYPE': 'ARMORED', 'BONUS': {'LIGHT': 6.5}}
-#     TERRAN_VIKINGASSAULT = {'DPS': 16.8, 'TARGET': ['GROUND'], 'SPEED': 3.15, 'RANGE': 6, 'TYPE': 'ARMORED', 'BONUS': {'MECHANICAL': 11.3}}
-#     TERRAN_VIKINGFIGHTER = {'DPS': 14, 'TARGET': ['AIR'], 'SPEED': 3.85, 'RANGE': 9, 'TYPE': 'ARMORED', 'BONUS': {'ARMORED': 5.6}}
-#     TERRAN_MEDIVAC = {'DPS': 0, 'TARGET': ['NONE'], 'SPEED': 3.5, 'RANGE': 'NONE', 'TYPE': 'ARMORED', 'BONUS': 'NONE'}
-#     TERRAN_LIBERATOR = None
-#     TERRAN_LIBERATORAG = {'DPS': 'NONE', 'TARGET': ['GROUND', 'AIR'], 'SPEED': 3.85, 'RANGE': 'NONE', 'TYPE': 'LIGHT', 'BONUS': 'NONE'}
-#     TERRAN_RAVEN = {'DPS': 65.9, 'TARGET': ['GROUND'], 'SPEED': 2.62, 'RANGE': 7, 'TYPE': 'ARMORED', 'BONUS': {'LIGHT': 6.5}}
-#     TERRAN_BANSHEE = {'DPS': 27, 'TARGET': ['GROUND'], 'SPEED': 3.85,'RANGE': 6, 'TYPE': 'LIGHT', 'BONUS': 'NONE'}
-#     TERRAN_BATTLECRUISER =  {'DPS': 49.8, 'TARGET': ['GROUND', 'AIR'], 'SPEED': 2.62, 'RANGE': 6, 'TYPE': 'ARMORED', 'BONUS': 'NONE'}

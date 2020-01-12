@@ -1427,19 +1427,8 @@ class Bot(MyAgent):
         """Draws info about current session on screen"""
 
         mapdraw = self.map_tools.draw_text_screen
-        APEX = 0.014
 
         AGENTPRINT = 0.02
-
-        # def buildq():
-        #     buildings = []
-        #     doubles = 0
-        #     for builder in Bot.build_queue():
-        #         buildings.append(Bot.is_building_name(self, builder))
-        #     for e in buildings:
-        #         c = str(buildings.count(e) +':'+ e)
-        #         mapdraw(0.02, AGENTPRINT, "BUILD QUEUE: " + str(Bot.build_queue(self)), Color(100, 200, 255))
-        #         AGENTPRINT += 0.01
 
         mapdraw(0.02, 0.007, "----AGENTDATA----", Color(255, 255, 255))
         mapdraw(0.02, AGENTPRINT, "EXPANSIONS: " + str(len(Data.BASE_HANDLER)), Color(255, 255, 255))

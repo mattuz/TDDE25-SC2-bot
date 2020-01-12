@@ -5,8 +5,10 @@ from library import *
 class Data():
     """Data-class for MyAgent, more features to be added"""
 
-    AGENTSTATE = {'STATE': 0, 'PURPOSE': 'OFFENCE', 'ROUTINE': 'UPKEEP', 'STRATEGY': 'BIOPRESSURE'}
-    AGENT_WORKER = {'MINERS': [], 'GAS': [], 'BUILDER': [], 'REPAIR': [], 'ALL_WORKERS': []}
+    AGENTSTATE = {'STATE': 0, 'PURPOSE': 'OFFENCE',
+                  'ROUTINE': 'UPKEEP', 'STRATEGY': 'BIOPRESSURE'}
+    AGENT_WORKER = {'MINERS': [], 'GAS': [], 'BUILDER': [],
+                    'REPAIR': [], 'ALL_WORKERS': []}
     AGENT_COMBATUNITS = {'DEFENCE': {}, 'OFFENCE': {}}
     AGENTUNITS = {}
     BASE_HANDLER = {}
@@ -96,6 +98,7 @@ class Data():
 
         return WALLPOSITION[step][0], WALLPOSITION[step][1]
 
+##Kan vi ta bort nedan?
 # class UnitData():
 #
 #     TERRAN_MARINE = {'DPS': 9.8, 'TARGET': ['GROUND', 'AIR'], 'SPEED': 3.15,'RANGE': 5, 'TYPE': 'LIGHT', 'BONUS': 'NONE'}

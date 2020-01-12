@@ -1,11 +1,8 @@
 import os
 import time
-
 from library import *
-
 from Bot import *
 from data import *
-
 
 
 class MyAgent(IDABot):
@@ -27,10 +24,9 @@ class MyAgent(IDABot):
 
         IDABot.on_step(self)
 
+
         "MAIN"
-
         "CO-ROUTINES"
-
         Bot.unit_debug(self)  # DEBUG
         Bot.neutral_debug(self)  # DEBUG
 
@@ -46,8 +42,6 @@ class MyAgent(IDABot):
             Bot.make_refinery(self)
             Bot.make_barracks(self)
             Bot.make_workers(self)
-            #Bot.move_marines_to_ramp(self)
-            #Bot.move_siege_to_defend(self)
             Bot.make_factory(self)
             Bot.factory_upgrade(self)
             Bot.make_siege_tanks(self)
@@ -60,6 +54,7 @@ class MyAgent(IDABot):
 
             if UNIT_TYPEID.TERRAN_SUPPLYDEPOT in Data.AGENTUNITS:
                 Bot.make_expansion(self)
+                #Ska vi ta bort den nedan?
                 #Bot.stray_worker_handling(self)
             if 'ATTACKERS' not in Data.AGENT_COMBATUNITS:
                 Bot.move_marines_to_ramp(self)
